@@ -1,10 +1,14 @@
 package my.com.toru.gogotimer
 
+import android.annotation.SuppressLint
 import android.app.Service
 import android.content.Intent
-import android.os.*
+import android.os.Handler
+import android.os.IBinder
+import android.os.Message
 import android.support.v4.app.NotificationCompat
 import android.util.Log
+
 
 class TimerService : Service() {
     override fun onBind(p0: Intent?): IBinder? = null
@@ -18,7 +22,7 @@ class TimerService : Service() {
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         Log.w("TimerService", "onStartCommand")
-        var second = intent?.getIntExtra("SECOND", 0)
+        val second = intent?.getIntExtra("SECOND", 10000)!!
 
         val noti = NotificationCompat.Builder(this, "GOGOTIMER_CHANNEL")
         noti.setSmallIcon(R.mipmap.ic_launcher)
@@ -32,12 +36,13 @@ class TimerService : Service() {
         val msg = Message()
         msg.apply{
             what = 1024
-            arg1 = 10000
+            arg1 = second
         }
         handler.sendMessage(msg)
         return START_STICKY
     }
 
+    @SuppressLint("HandlerLeak")
     inner class MyHandler: Handler(){
         override fun handleMessage(msg: Message?) {
             when(msg?.what){
@@ -48,6 +53,7 @@ class TimerService : Service() {
                     }
                     else{
                         Log.w("TimerService", "handler!!")
+
                         val newMsg = Message()
                         newMsg.apply {
                             what = 1024

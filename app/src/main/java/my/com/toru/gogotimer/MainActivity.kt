@@ -21,7 +21,18 @@ class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
+        Log.w("MainActivity", "onCreate")
         initView()
+    }
+
+    override fun onResume() {
+        super.onResume()
+        Log.w("MainActivity", "onResume")
+    }
+
+    override fun onRestoreInstanceState(savedInstanceState: Bundle?) {
+        super.onRestoreInstanceState(savedInstanceState)
+        Log.w("MainActivity", "onRestoreInstanceState")
     }
 
     private var isPlaying = false
