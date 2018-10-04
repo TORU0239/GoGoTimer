@@ -1,14 +1,9 @@
 package my.com.toru.gogotimer
 
-import android.content.ComponentName
-import android.content.Context
 import android.content.Intent
-import android.content.ServiceConnection
+import android.os.Build
 import android.os.Bundle
-import android.os.Handler
-import android.os.IBinder
-import android.os.Message
-import android.support.v4.content.ContextCompat
+import android.support.v7.app.AlertDialog
 import android.support.v7.app.AppCompatActivity
 import android.text.Editable
 import android.text.TextWatcher
@@ -39,8 +34,14 @@ class MainActivity : AppCompatActivity() {
 
     private fun initView(){
         tlb_info.setOnClickListener {
-            Toast.makeText(this@MainActivity, "Under Implementation", Toast.LENGTH_SHORT).show()
 
+            val dialog = AlertDialog.Builder(this@MainActivity)
+            dialog.setTitle("User Info")
+                    .setMessage("Created by Toru Wonyoung Choi")
+                    .setNeutralButton("Dismiss") { dialogInterface, p1 ->
+                        dialogInterface.dismiss()
+                    }
+                    .create().show()
         }
 
         tlb_history.setOnClickListener {
@@ -73,7 +74,14 @@ class MainActivity : AppCompatActivity() {
                 isPlaying = true
                 btn_trigger_timer.setImageResource(R.drawable.ic_outline_pause_24px)
                 val intent = Intent(this@MainActivity, TimerService::class.java)
-                startService(intent)
+
+                if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.O){
+                    startForegroundService(intent)
+                }
+                else{
+                    startService(intent)
+                }
+
             }
             else{
                 Log.w("MainActivity", "Pushed not playing")
