@@ -23,7 +23,7 @@
         android:src="@drawable/ic_outline_history_24px"
         app:layout_constraintRight_toRightOf="parent"/>
 
-    <RelativeLayout
+    <android.support.constraint.ConstraintLayout
         android:id="@+id/rl_main_alarm"
         android:layout_width="210dp"
         android:layout_height="210dp"
@@ -33,44 +33,82 @@
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintBottom_toBottomOf="parent">
 
-        <ImageView
-            android:layout_width="48dp"
-            android:layout_height="48dp"
-            android:layout_marginTop="20dp"
-            android:layout_centerHorizontal="true"
-            android:layout_alignParentTop="true"
-            android:src="@drawable/ic_outline_expand_less_24px"/>
-
         <TextView
+            android:id="@+id/txt_hours"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_centerInParent="true"
-            android:text="12:00:00"
+            android:text="00"
             android:textSize="36sp"
-            android:textColor="@android:color/white"/>
+            android:textColor="@android:color/white"
+            app:layout_constraintRight_toLeftOf="@+id/txt_minutes"
+            app:layout_constraintLeft_toLeftOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent"/>
+
+        <TextView
+            android:id="@+id/txt_minutes"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="00"
+            android:textSize="36sp"
+            android:textColor="@android:color/white"
+            app:layout_constraintLeft_toLeftOf="parent"
+            app:layout_constraintRight_toRightOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent"/>
+
+        <TextView
+            android:id="@+id/txt_seconds"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="10"
+            android:textSize="36sp"
+            android:textColor="@android:color/white"
+            app:layout_constraintLeft_toRightOf="@id/txt_minutes"
+            app:layout_constraintRight_toRightOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent"/>
 
         <ImageView
+            android:id="@+id/btn_increase_time"
             android:layout_width="48dp"
             android:layout_height="48dp"
-            android:layout_marginBottom="20dp"
-            android:layout_centerHorizontal="true"
-            android:layout_alignParentBottom="true"
-            android:src="@drawable/ic_outline_expand_more_24px"/>
+            android:layout_marginTop="10dp"
+            android:src="@drawable/ic_outline_expand_less_24px"
+            app:layout_constraintLeft_toLeftOf="parent"
+            app:layout_constraintRight_toRightOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
 
-    </RelativeLayout>
+        <ImageView
+            android:id="@+id/btn_decrease_time"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:layout_marginBottom="10dp"
+            android:src="@drawable/ic_outline_expand_more_24px"
+            app:layout_constraintLeft_toLeftOf="parent"
+            app:layout_constraintRight_toRightOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent"/>
 
-    <TextView
+    </android.support.constraint.ConstraintLayout>
+
+    <EditText
+        android:id="@+id/ed_task"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginBottom="40dp"
-        android:text="Enter TASK"
-        android:textSize="24sp"
+        android:maxLines="1"
+        android:inputType="text"
+        android:hint="Enter TASK"
+        android:textColorHint="@android:color/white"
+        android:background="@android:color/transparent"
+        android:textSize="30sp"
         android:textColor="@android:color/white"
         app:layout_constraintBottom_toTopOf="@id/rl_main_alarm"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent"/>
 
     <ImageView
+        android:id="@+id/btn_trigger_timer"
         android:layout_width="48dp"
         android:layout_height="48dp"
         android:layout_marginTop="40dp"
