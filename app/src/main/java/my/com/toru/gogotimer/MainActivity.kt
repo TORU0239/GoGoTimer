@@ -24,21 +24,6 @@ class MainActivity : AppCompatActivity() {
         initView()
     }
 
-    private lateinit var service:TimerService
-    private var isBound = false
-
-    private val connection = object:ServiceConnection{
-        override fun onServiceDisconnected(component: ComponentName?) {
-            isBound = false
-        }
-
-        override fun onServiceConnected(componentName: ComponentName?, iBinder: IBinder?) {
-            val binder = iBinder as TimerService.TimerBinder
-            service = binder.getTimerBinder()
-            isBound = true
-        }
-    }
-
     private var isPlaying = false
 
     private fun initView(){
