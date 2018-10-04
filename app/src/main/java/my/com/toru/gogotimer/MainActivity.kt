@@ -1,6 +1,7 @@
 package my.com.toru.gogotimer
 
 import android.os.Bundle
+import android.support.v4.content.ContextCompat
 import android.support.v7.app.AppCompatActivity
 import android.text.Editable
 import android.text.TextWatcher
@@ -14,6 +15,8 @@ class MainActivity : AppCompatActivity() {
         setContentView(R.layout.activity_main)
         initView()
     }
+
+    private var isPlaying = false
 
     private fun initView(){
         tlb_info.setOnClickListener {
@@ -46,7 +49,14 @@ class MainActivity : AppCompatActivity() {
         }
 
         btn_trigger_timer.setOnClickListener {
-
+            if(isPlaying){
+                isPlaying = false
+                btn_trigger_timer.setImageResource(R.drawable.ic_outline_pause_24px)
+            }
+            else{
+                isPlaying = true
+                btn_trigger_timer.setImageResource(R.drawable.ic_outline_arrow_forward_ios_24px)
+            }
         }
     }
 }
