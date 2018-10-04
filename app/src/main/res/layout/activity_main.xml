@@ -50,6 +50,7 @@
             android:textColor="@android:color/white"/>
 
         <ImageView
+            android:id="@+id/btn_decrease_time"
             android:layout_width="48dp"
             android:layout_height="48dp"
             android:layout_marginBottom="20dp"
