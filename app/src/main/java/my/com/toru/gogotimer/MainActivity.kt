@@ -58,5 +58,17 @@ class MainActivity : AppCompatActivity() {
                 btn_trigger_timer.setImageResource(R.drawable.ic_outline_arrow_forward_ios_24px)
             }
         }
+
+        txt_hours.setOnClickListener {
+
+        }
+
+        txt_minutes.setOnClickListener {
+
+        }
+
+        txt_seconds.setOnClickListener {
+
+        }
     }
 }
