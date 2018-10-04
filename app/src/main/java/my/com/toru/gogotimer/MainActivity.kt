@@ -1,10 +1,18 @@
 package my.com.toru.gogotimer
 
+import android.content.ComponentName
+import android.content.Context
+import android.content.Intent
+import android.content.ServiceConnection
 import android.os.Bundle
+import android.os.Handler
+import android.os.IBinder
+import android.os.Message
 import android.support.v4.content.ContextCompat
 import android.support.v7.app.AppCompatActivity
 import android.text.Editable
 import android.text.TextWatcher
+import android.util.Log
 import android.widget.Toast
 import kotlinx.android.synthetic.main.activity_main.*
 
@@ -14,6 +22,21 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
         initView()
+    }
+
+    private lateinit var service:TimerService
+    private var isBound = false
+
+    private val connection = object:ServiceConnection{
+        override fun onServiceDisconnected(component: ComponentName?) {
+            isBound = false
+        }
+
+        override fun onServiceConnected(componentName: ComponentName?, iBinder: IBinder?) {
+            val binder = iBinder as TimerService.TimerBinder
+            service = binder.getTimerBinder()
+            isBound = true
+        }
     }
 
     private var isPlaying = false
@@ -49,13 +72,19 @@ class MainActivity : AppCompatActivity() {
         }
 
         btn_trigger_timer.setOnClickListener {
-            if(isPlaying){
-                isPlaying = false
+            if(!isPlaying){
+                Log.w("MainActivity", "Pushed playing")
+                isPlaying = true
                 btn_trigger_timer.setImageResource(R.drawable.ic_outline_pause_24px)
+                val intent = Intent(this@MainActivity, TimerService::class.java)
+                startService(intent)
             }
             else{
-                isPlaying = true
+                Log.w("MainActivity", "Pushed not playing")
+                isPlaying = false
                 btn_trigger_timer.setImageResource(R.drawable.ic_outline_arrow_forward_ios_24px)
+                val intent = Intent(this@MainActivity, TimerService::class.java)
+                stopService(intent)
             }
         }
 

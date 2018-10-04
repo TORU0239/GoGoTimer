@@ -37,7 +37,7 @@
             android:id="@+id/txt_hours"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="01"
+            android:text="00"
             android:textSize="36sp"
             android:textColor="@android:color/white"
             app:layout_constraintRight_toLeftOf="@+id/txt_minutes"
