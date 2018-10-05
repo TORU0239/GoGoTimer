@@ -80,6 +80,7 @@ class TimerService : Service() {
                         newMsg.apply {
                             what = 1024
                             arg1 = (msg.arg1 - 1000)
+                            sendBroadcast(Intent("com.my.toru.UPDATE").putExtra("UPDATE", (msg.arg1 - 1000) / 1000))
                         }
                         sendMessageDelayed(newMsg, 1000)
                     }

@@ -1,8 +1,12 @@
 package my.com.toru.gogotimer
 
+import android.content.BroadcastReceiver
+import android.content.Context
 import android.content.Intent
+import android.content.IntentFilter
 import android.os.Build
 import android.os.Bundle
+import android.support.v4.content.LocalBroadcastManager
 import android.support.v7.app.AlertDialog
 import android.support.v7.app.AppCompatActivity
 import android.text.Editable
@@ -12,22 +16,30 @@ import android.widget.Toast
 import kotlinx.android.synthetic.main.activity_main.*
 
 class MainActivity : AppCompatActivity() {
+    private lateinit var receiver:TestBroadcastReceiver
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
         Log.w("MainActivity", "onCreate")
         initView()
+        receiver = TestBroadcastReceiver()
     }
 
     override fun onResume() {
         super.onResume()
         Log.w("MainActivity", "onResume")
+        LocalBroadcastManager.getInstance(this@MainActivity).registerReceiver(receiver, IntentFilter("com.my.toru.UPDATE"))
     }
 
     override fun onRestoreInstanceState(savedInstanceState: Bundle?) {
         super.onRestoreInstanceState(savedInstanceState)
         Log.w("MainActivity", "onRestoreInstanceState")
+    }
+
+    override fun onDestroy() {
+        LocalBroadcastManager.getInstance(this@MainActivity).unregisterReceiver(receiver)
+        super.onDestroy()
     }
 
     private var isPlaying = false
@@ -103,5 +115,21 @@ class MainActivity : AppCompatActivity() {
         txt_seconds.setOnClickListener {
 
         }
+    }
+
+    inner class TestBroadcastReceiver:BroadcastReceiver(){
+        override fun onReceive(context: Context?, intent: Intent?) {
+            Log.w("MainActivity", "update")
+            when(intent?.action){
+                "com.my.toru.UPDATE"->{
+                    Log.w("MainActivity", "update")
+                    txt_seconds.text = intent.getIntExtra("UPDATE", -1).toString()
+                }
+                else->{
+                    Log.w("MainActivity", "WTF???")
+                }
+            }
+        }
+
     }
 }
