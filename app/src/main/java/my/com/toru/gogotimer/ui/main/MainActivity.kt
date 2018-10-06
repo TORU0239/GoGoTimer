@@ -1,4 +1,4 @@
-package my.com.toru.gogotimer
+package my.com.toru.gogotimer.ui.main
 
 import android.content.BroadcastReceiver
 import android.content.Context
@@ -14,9 +14,15 @@ import android.util.Log
 import android.widget.TextView
 import android.widget.Toast
 import kotlinx.android.synthetic.main.activity_main.*
+import my.com.toru.gogotimer.R
+import my.com.toru.gogotimer.service.TimerService
 
 class MainActivity : AppCompatActivity() {
-    private lateinit var receiver:TestBroadcastReceiver
+    companion object {
+        private val TAG = MainActivity::class.java.simpleName
+    }
+
+    private lateinit var receiver: TestBroadcastReceiver
 
     private var currentSeletedItem = -1
 
@@ -36,7 +42,7 @@ class MainActivity : AppCompatActivity() {
 
     override fun onRestoreInstanceState(savedInstanceState: Bundle?) {
         super.onRestoreInstanceState(savedInstanceState)
-        Log.w("MainActivity", "onRestoreInstanceState")
+        Log.w(TAG, "onRestoreInstanceState")
     }
 
     override fun onPause() {
@@ -126,11 +132,11 @@ class MainActivity : AppCompatActivity() {
 
         btn_trigger_timer.setOnClickListener {
             if(!isPlaying){
-                Log.w("MainActivity", "Pushed playing")
+                Log.w(TAG, "Pushed playing")
                 val alarmTime = calculateTimeInMilliSecond(txt_hours.getInteger(),
                                                                 txt_minutes.getInteger(),
                                                                 txt_seconds.getInteger())
-                Log.w("MainActivity", "alarmTime::${alarmTime * 1000}")
+                Log.w(TAG, "alarmTime::${alarmTime * 1000}")
 
                 if(alarmTime > 0){
                     isPlaying = true
@@ -206,14 +212,14 @@ class MainActivity : AppCompatActivity() {
             Log.w("MainActivity", "update")
             when(intent?.action){
                 "com.my.toru.UPDATE"->{
-                    Log.w("MainActivity", "update")
+                    Log.w(TAG, "update")
                     txt_seconds.setFormattedDigit(intent.getIntExtra("UPDATE", -1))
                     if(txt_seconds.text == "00"){
                         btn_trigger_timer.setImageResource(R.drawable.ic_outline_arrow_forward_ios_24px)
                     }
                 }
                 else->{
-                    Log.w("MainActivity", "WTF???")
+                    Log.w(TAG, "WTF???")
                 }
             }
         }

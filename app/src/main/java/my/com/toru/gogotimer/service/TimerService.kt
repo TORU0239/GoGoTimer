@@ -1,4 +1,4 @@
-package my.com.toru.gogotimer
+package my.com.toru.gogotimer.service
 
 import android.annotation.SuppressLint
 import android.app.NotificationManager
@@ -12,12 +12,14 @@ import android.os.IBinder
 import android.os.Message
 import android.support.v4.app.NotificationCompat
 import android.util.Log
+import my.com.toru.gogotimer.R
+import my.com.toru.gogotimer.ui.main.MainActivity
 
 
 class TimerService : Service() {
     override fun onBind(p0: Intent?): IBinder? = null
 
-    private lateinit var handler:MyHandler
+    private lateinit var handler: MyHandler
 
     override fun onCreate() {
         super.onCreate()
