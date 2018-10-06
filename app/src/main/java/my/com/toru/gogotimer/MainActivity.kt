@@ -6,7 +6,6 @@ import android.content.Intent
 import android.content.IntentFilter
 import android.os.Build
 import android.os.Bundle
-import android.support.v4.content.LocalBroadcastManager
 import android.support.v7.app.AlertDialog
 import android.support.v7.app.AppCompatActivity
 import android.text.Editable
@@ -32,7 +31,7 @@ class MainActivity : AppCompatActivity() {
     override fun onResume() {
         super.onResume()
         Log.w("MainActivity", "onResume")
-        LocalBroadcastManager.getInstance(this@MainActivity).registerReceiver(receiver, IntentFilter("com.my.toru.UPDATE"))
+        registerReceiver(receiver, IntentFilter("com.my.toru.UPDATE"))
     }
 
     override fun onRestoreInstanceState(savedInstanceState: Bundle?) {
@@ -40,9 +39,9 @@ class MainActivity : AppCompatActivity() {
         Log.w("MainActivity", "onRestoreInstanceState")
     }
 
-    override fun onDestroy() {
-        LocalBroadcastManager.getInstance(this@MainActivity).unregisterReceiver(receiver)
-        super.onDestroy()
+    override fun onPause() {
+        unregisterReceiver(receiver)
+        super.onPause()
     }
 
     private var isPlaying = false
@@ -116,8 +115,7 @@ class MainActivity : AppCompatActivity() {
 
         ed_task.apply{
             addTextChangedListener(object: TextWatcher {
-                override fun afterTextChanged(e: Editable?) {
-                }
+                override fun afterTextChanged(e: Editable?) {}
 
                 override fun beforeTextChanged(p0: CharSequence?, p1: Int, p2: Int, p3: Int) {}
 
@@ -146,6 +144,10 @@ class MainActivity : AppCompatActivity() {
                     else{
                         startService(intent)
                     }
+
+                    txt_hours.isChecked = false
+                    txt_minutes.isChecked = false
+                    txt_seconds.isChecked = false
                 }
                 else{
                     Toast.makeText(this@MainActivity, "MUST set timer more than 0 second", Toast.LENGTH_SHORT)
@@ -193,6 +195,7 @@ class MainActivity : AppCompatActivity() {
         this.text = String.format("%1$02d", digit)
     }
 
+    // TODO:
     private fun calculateTimeInMilliSecond(hour:Int, minute:Int, second:Int):Int =
             ((60 * 60 * hour) + (60 * minute) + second) * 1000
 
@@ -204,14 +207,16 @@ class MainActivity : AppCompatActivity() {
             when(intent?.action){
                 "com.my.toru.UPDATE"->{
                     Log.w("MainActivity", "update")
-                    txt_seconds.text = intent.getIntExtra("UPDATE", -1).toString()
+                    txt_seconds.setFormattedDigit(intent.getIntExtra("UPDATE", -1))
+                    if(txt_seconds.text == "00"){
+                        btn_trigger_timer.setImageResource(R.drawable.ic_outline_arrow_forward_ios_24px)
+                    }
                 }
                 else->{
                     Log.w("MainActivity", "WTF???")
                 }
             }
         }
-
     }
 }
 
