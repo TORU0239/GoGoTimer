@@ -105,15 +105,30 @@ class MainActivity : AppCompatActivity() {
         }
 
         txt_hours.setOnClickListener {
-
+            txt_hours.isChecked = !txt_hours.isChecked
+            if(txt_hours.isChecked){
+                txt_minutes.isChecked = false
+                txt_seconds.isChecked = false
+            }
+            Log.w("MainActivity", "hours checked?? " + txt_hours.isChecked)
         }
 
         txt_minutes.setOnClickListener {
-
+            txt_minutes.isChecked = !txt_minutes.isChecked
+            if(txt_minutes.isChecked){
+                txt_hours.isChecked = false
+                txt_seconds.isChecked = false
+            }
+            Log.w("MainActivity", "minutes checked?? " + txt_minutes.isChecked)
         }
 
         txt_seconds.setOnClickListener {
-
+            txt_seconds.isChecked = !txt_seconds.isChecked
+            if(txt_seconds.isChecked){
+                txt_hours.isChecked = false
+                txt_minutes.isChecked = false
+            }
+            Log.w("MainActivity", "seconds checked?? " + txt_seconds.isChecked)
         }
     }
 
