@@ -1,17 +1,24 @@
 package my.com.toru.gogotimer.ui.history
 
+import android.databinding.DataBindingUtil
 import android.support.v7.widget.RecyclerView
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import my.com.toru.gogotimer.R
-import my.com.toru.gogotimer.database.dao.TimerHistoryData
+import my.com.toru.gogotimer.databinding.AdapterTimerBinding
+import my.com.toru.gogotimer.model.TimerHistoryData
 import java.util.*
+import kotlin.collections.ArrayList
 
-class HistoryAdapter(var list: LinkedList<TimerHistoryData>) : RecyclerView.Adapter<HistoryViewHolder>(){
+class HistoryAdapter(var list: ArrayList<TimerHistoryData>) : RecyclerView.Adapter<HistoryViewHolder>(){
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): HistoryViewHolder {
-        return HistoryViewHolder(LayoutInflater.from(parent.context).inflate(R.layout.adapter_timer, parent, false))
+        val bindingAdapter: AdapterTimerBinding = DataBindingUtil.inflate(LayoutInflater.from(parent.context),
+                                                                        R.layout.adapter_timer,
+                                                                        parent,
+                                                            false)
+        return HistoryViewHolder(bindingAdapter)
     }
 
     override fun getItemCount(): Int = list.size
@@ -21,8 +28,15 @@ class HistoryAdapter(var list: LinkedList<TimerHistoryData>) : RecyclerView.Adap
     }
 }
 
-class HistoryViewHolder(view:View):RecyclerView.ViewHolder(view){
-    fun bindData(item:TimerHistoryData){
+class HistoryViewHolder(private val binding:AdapterTimerBinding):RecyclerView.ViewHolder(binding.root){
+    fun bindData(item: TimerHistoryData){
+        if(item.taskStartTimeStamp == 0L){
+            binding.imgAlarm.setImageResource(R.drawable.ic_baseline_alarm_off_24px)
+        }
+        else{
+            binding.imgAlarm.setImageResource(R.drawable.ic_baseline_alarm_on_24px)
+        }
 
+        binding.txtDescription.text = item.taskName
     }
 }

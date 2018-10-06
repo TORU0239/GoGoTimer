@@ -73,7 +73,7 @@ class TimerService : Service() {
 
                         val notiManager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
                         notiManager.notify(1024, noti.build())
-
+                        sendBroadcast(Intent("com.my.toru.FINISHED"))
                         stopSelf()
                     }
                     else{

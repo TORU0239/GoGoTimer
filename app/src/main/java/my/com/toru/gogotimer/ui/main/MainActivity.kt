@@ -15,7 +15,10 @@ import android.widget.TextView
 import android.widget.Toast
 import kotlinx.android.synthetic.main.activity_main.*
 import my.com.toru.gogotimer.R
+import my.com.toru.gogotimer.database.AppDatabase
+import my.com.toru.gogotimer.model.TimerHistoryData
 import my.com.toru.gogotimer.service.TimerService
+import my.com.toru.gogotimer.ui.history.HistoryActivity
 
 class MainActivity : AppCompatActivity() {
     companion object {
@@ -37,7 +40,12 @@ class MainActivity : AppCompatActivity() {
     override fun onResume() {
         super.onResume()
         Log.w("MainActivity", "onResume")
-        registerReceiver(receiver, IntentFilter("com.my.toru.UPDATE"))
+        val intentFilter = IntentFilter()
+        intentFilter.apply {
+            addAction("com.my.toru.UPDATE")
+            addAction("com.my.toru.FINISHED")
+        }
+        registerReceiver(receiver, intentFilter)
     }
 
     override fun onRestoreInstanceState(savedInstanceState: Bundle?) {
@@ -65,7 +73,7 @@ class MainActivity : AppCompatActivity() {
         }
 
         tlb_history.setOnClickListener {
-            Toast.makeText(this@MainActivity, "Under Construction", Toast.LENGTH_SHORT).show()
+            startActivity(Intent(this@MainActivity, HistoryActivity::class.java))
         }
 
         btn_increase_time.setOnClickListener {
@@ -151,6 +159,20 @@ class MainActivity : AppCompatActivity() {
                         startService(intent)
                     }
 
+                    val db = AppDatabase.getInstance(this@MainActivity)
+                    val dao = db?.timerHistoryDao()
+                    val historyData = TimerHistoryData()
+                    historyData.apply {
+                        taskName = ed_task.editableText.toString()
+                        taskStartTimeStamp = System.currentTimeMillis()
+                    }
+
+                    dao?.apply {
+                        insertData(historyData)
+                        Log.w(TAG, "total Size:: ${getAll().size}")
+                    }
+
+
                     txt_hours.isChecked = false
                     txt_minutes.isChecked = false
                     txt_seconds.isChecked = false
@@ -214,9 +236,22 @@ class MainActivity : AppCompatActivity() {
                 "com.my.toru.UPDATE"->{
                     Log.w(TAG, "update")
                     txt_seconds.setFormattedDigit(intent.getIntExtra("UPDATE", -1))
-                    if(txt_seconds.text == "00"){
-                        btn_trigger_timer.setImageResource(R.drawable.ic_outline_arrow_forward_ios_24px)
+                }
+                "com.my.toru.FINISHED"->{
+                    btn_trigger_timer.setImageResource(R.drawable.ic_outline_arrow_forward_ios_24px)
+                    val db = AppDatabase.getInstance(this@MainActivity)
+                    val dao = db?.timerHistoryDao()
+                    val historyData = TimerHistoryData()
+                    historyData.apply {
+                        taskName = ed_task.editableText.toString()
+                        taskEndTimeStamp = System.currentTimeMillis()
                     }
+
+                    dao?.let{
+                        it.insertData(historyData)
+                        Log.w(TAG, "total Size:: ${it.getAll().size}")
+                    }
+
                 }
                 else->{
                     Log.w(TAG, "WTF???")
