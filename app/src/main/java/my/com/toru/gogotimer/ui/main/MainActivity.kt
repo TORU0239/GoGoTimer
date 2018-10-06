@@ -146,40 +146,45 @@ class MainActivity : AppCompatActivity() {
                                                                 txt_seconds.getInteger())
                 Log.w(TAG, "alarmTime::${alarmTime * 1000}")
 
-                if(alarmTime > 0){
-                    isPlaying = true
-                    btn_trigger_timer.setImageResource(R.drawable.ic_outline_pause_24px)
-
-                    val intent = Intent(this@MainActivity, TimerService::class.java)
-                    intent.putExtra("SECOND", alarmTime)
-                    if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.O){
-                        startForegroundService(intent)
-                    }
-                    else{
-                        startService(intent)
-                    }
-
-                    val db = AppDatabase.getInstance(this@MainActivity)
-                    val dao = db?.timerHistoryDao()
-                    val historyData = TimerHistoryData()
-                    historyData.apply {
-                        taskName = ed_task.editableText.toString()
-                        taskStartTimeStamp = System.currentTimeMillis()
-                    }
-
-                    dao?.apply {
-                        insertData(historyData)
-                        Log.w(TAG, "total Size:: ${getAll().size}")
-                    }
-
-
-                    txt_hours.isChecked = false
-                    txt_minutes.isChecked = false
-                    txt_seconds.isChecked = false
+                if(ed_task.editableText.toString().isEmpty()){
+                    Toast.makeText(this@MainActivity, "MUST set task name", Toast.LENGTH_SHORT).show()
                 }
                 else{
-                    Toast.makeText(this@MainActivity, "MUST set timer more than 0 second", Toast.LENGTH_SHORT)
-                            .show()
+                    if(alarmTime > 0){
+                        isPlaying = true
+                        btn_trigger_timer.setImageResource(R.drawable.ic_outline_pause_24px)
+
+                        val intent = Intent(this@MainActivity, TimerService::class.java)
+                        intent.putExtra("SECOND", alarmTime)
+                        if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.O){
+                            startForegroundService(intent)
+                        }
+                        else{
+                            startService(intent)
+                        }
+
+                        val db = AppDatabase.getInstance(this@MainActivity)
+                        val dao = db?.timerHistoryDao()
+                        val historyData = TimerHistoryData()
+                        historyData.apply {
+                            taskName = ed_task.editableText.toString()
+                            taskStartTimeStamp = System.currentTimeMillis()
+                        }
+
+                        dao?.apply {
+                            insertData(historyData)
+                            Log.w(TAG, "total Size:: ${getAll().size}")
+                        }
+
+
+                        txt_hours.isChecked = false
+                        txt_minutes.isChecked = false
+                        txt_seconds.isChecked = false
+                    }
+                    else{
+                        Toast.makeText(this@MainActivity, "MUST set timer more than 0 second", Toast.LENGTH_SHORT)
+                                .show()
+                    }
                 }
             }
             else{

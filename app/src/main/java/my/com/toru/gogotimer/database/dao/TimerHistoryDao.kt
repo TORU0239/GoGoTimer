@@ -7,7 +7,7 @@ import my.com.toru.gogotimer.model.TimerHistoryData
 
 @Dao
 interface TimerHistoryDao {
-    @Query("SELECT * from timerHistory")
+    @Query("SELECT * from timerHistory order by id DESC")
     fun getAll():List<TimerHistoryData>
 
     @Insert
