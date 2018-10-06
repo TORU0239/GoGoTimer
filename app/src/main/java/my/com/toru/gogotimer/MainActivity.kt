@@ -66,13 +66,30 @@ class MainActivity : AppCompatActivity() {
         btn_increase_time.setOnClickListener {
             when(currentSeletedItem){
                 CurrentStatus.HOURS.status->{
-                    txt_hours.text = (Integer.parseInt(txt_hours.text as String) + 1).toString()
+                    if((txt_hours.text as String).toInt() == 23){
+                        Toast.makeText(this@MainActivity, "Cannot set timer more than one day", Toast.LENGTH_SHORT).show()
+                    }
+                    else{
+                        txt_hours.setFormattedDigit((Integer.parseInt(txt_hours.text as String) + 1))
+                    }
                 }
                 CurrentStatus.MINUTES.status->{
-                    txt_minutes.text = (Integer.parseInt(txt_minutes.text as String) + 1).toString()
+                    if((txt_minutes.text as String).toInt() == 59){
+                        txt_minutes.setFormattedDigit(0)
+                        txt_hours.setFormattedDigit((Integer.parseInt(txt_minutes.text as String) + 1))
+                    }
+                    else{
+                        txt_minutes.setFormattedDigit((Integer.parseInt(txt_minutes.text as String) + 1))
+                    }
                 }
                 CurrentStatus.SECONDS.status->{
-                    txt_seconds.text = (Integer.parseInt(txt_seconds.text as String) + 1).toString()
+                    if((txt_seconds.text as String).toInt() == 59){
+                        txt_seconds.setFormattedDigit(0)
+                        txt_minutes.setFormattedDigit((Integer.parseInt(txt_minutes.text as String) + 1))
+                    }
+                    else{
+                        txt_seconds.setFormattedDigit((Integer.parseInt(txt_seconds.text as String) + 1))
+                    }
                 }
             }
         }
@@ -81,17 +98,17 @@ class MainActivity : AppCompatActivity() {
             when(currentSeletedItem){
                 CurrentStatus.HOURS.status->{
                     if((txt_hours.text as String).toInt() > 0){
-                        txt_hours.text = (Integer.parseInt(txt_hours.text as String) - 1).toString()
+                        txt_hours.setFormattedDigit((Integer.parseInt(txt_hours.text as String) - 1))
                     }
                 }
                 CurrentStatus.MINUTES.status->{
                     if((txt_minutes.text as String).toInt() > 0){
-                        txt_minutes.text = (Integer.parseInt(txt_minutes.text as String) - 1).toString()
+                        txt_minutes.setFormattedDigit((Integer.parseInt(txt_minutes.text as String) - 1))
                     }
                 }
                 CurrentStatus.SECONDS.status->{
                     if((txt_seconds.text as String).toInt() > 0){
-                        txt_seconds.text = (Integer.parseInt(txt_seconds.text as String) - 1).toString()
+                        txt_seconds.setFormattedDigit((Integer.parseInt(txt_seconds.text as String) - 1))
                     }
                 }
             }
@@ -112,15 +129,15 @@ class MainActivity : AppCompatActivity() {
         btn_trigger_timer.setOnClickListener {
             if(!isPlaying){
                 Log.w("MainActivity", "Pushed playing")
-                isPlaying = true
-                btn_trigger_timer.setImageResource(R.drawable.ic_outline_pause_24px)
-
-                val alarmTime = calculateTimeInSecond(txt_hours.getInteger(),
-                                                            txt_minutes.getInteger(),
+                val alarmTime = calculateTimeInMilliSecond(txt_hours.getInteger(),
+                                                                txt_minutes.getInteger(),
                                                                 txt_seconds.getInteger())
-
                 Log.w("MainActivity", "alarmTime::${alarmTime * 1000}")
-                if(alarmTime > 0 ){
+
+                if(alarmTime > 0){
+                    isPlaying = true
+                    btn_trigger_timer.setImageResource(R.drawable.ic_outline_pause_24px)
+
                     val intent = Intent(this@MainActivity, TimerService::class.java)
                     intent.putExtra("SECOND", alarmTime)
                     if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.O){
@@ -172,7 +189,11 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    private fun calculateTimeInSecond(hour:Int, minute:Int, second:Int):Int =
+    private fun TextView.setFormattedDigit(digit:Int){
+        this.text = String.format("%1$02d", digit)
+    }
+
+    private fun calculateTimeInMilliSecond(hour:Int, minute:Int, second:Int):Int =
             ((60 * 60 * hour) + (60 * minute) + second) * 1000
 
     private fun TextView.getInteger():Int = Integer.parseInt(this.text as String)
