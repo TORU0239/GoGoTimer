@@ -26,7 +26,8 @@ class TimerService : Service() {
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         Log.w("TimerService", "onStartCommand")
-        val second = intent?.getIntExtra("SECOND", 10 * 1000)!!
+        val second = intent?.getIntExtra("SECOND", 0)!!
+        Log.w("TimerService", "second:: $second")
         if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.O){
             val noti = NotificationCompat.Builder(this, "GOGOTIMER_CHANNEL")
             noti.setSmallIcon(R.mipmap.ic_launcher)

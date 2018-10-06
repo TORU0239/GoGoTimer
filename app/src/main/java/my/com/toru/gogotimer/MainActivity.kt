@@ -12,11 +12,14 @@ import android.support.v7.app.AppCompatActivity
 import android.text.Editable
 import android.text.TextWatcher
 import android.util.Log
+import android.widget.TextView
 import android.widget.Toast
 import kotlinx.android.synthetic.main.activity_main.*
 
 class MainActivity : AppCompatActivity() {
     private lateinit var receiver:TestBroadcastReceiver
+
+    private var currentSeletedItem = -1
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -61,11 +64,37 @@ class MainActivity : AppCompatActivity() {
         }
 
         btn_increase_time.setOnClickListener {
-
+            when(currentSeletedItem){
+                CurrentStatus.HOURS.status->{
+                    txt_hours.text = (Integer.parseInt(txt_hours.text as String) + 1).toString()
+                }
+                CurrentStatus.MINUTES.status->{
+                    txt_minutes.text = (Integer.parseInt(txt_minutes.text as String) + 1).toString()
+                }
+                CurrentStatus.SECONDS.status->{
+                    txt_seconds.text = (Integer.parseInt(txt_seconds.text as String) + 1).toString()
+                }
+            }
         }
 
         btn_decrease_time.setOnClickListener {
-
+            when(currentSeletedItem){
+                CurrentStatus.HOURS.status->{
+                    if((txt_hours.text as String).toInt() > 0){
+                        txt_hours.text = (Integer.parseInt(txt_hours.text as String) - 1).toString()
+                    }
+                }
+                CurrentStatus.MINUTES.status->{
+                    if((txt_minutes.text as String).toInt() > 0){
+                        txt_minutes.text = (Integer.parseInt(txt_minutes.text as String) - 1).toString()
+                    }
+                }
+                CurrentStatus.SECONDS.status->{
+                    if((txt_seconds.text as String).toInt() > 0){
+                        txt_seconds.text = (Integer.parseInt(txt_seconds.text as String) - 1).toString()
+                    }
+                }
+            }
         }
 
         ed_task.apply{
@@ -85,15 +114,26 @@ class MainActivity : AppCompatActivity() {
                 Log.w("MainActivity", "Pushed playing")
                 isPlaying = true
                 btn_trigger_timer.setImageResource(R.drawable.ic_outline_pause_24px)
-                val intent = Intent(this@MainActivity, TimerService::class.java)
 
-                if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.O){
-                    startForegroundService(intent)
+                val alarmTime = calculateTimeInSecond(txt_hours.getInteger(),
+                                                            txt_minutes.getInteger(),
+                                                                txt_seconds.getInteger())
+
+                Log.w("MainActivity", "alarmTime::${alarmTime * 1000}")
+                if(alarmTime > 0 ){
+                    val intent = Intent(this@MainActivity, TimerService::class.java)
+                    intent.putExtra("SECOND", alarmTime)
+                    if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.O){
+                        startForegroundService(intent)
+                    }
+                    else{
+                        startService(intent)
+                    }
                 }
                 else{
-                    startService(intent)
+                    Toast.makeText(this@MainActivity, "MUST set timer more than 0 second", Toast.LENGTH_SHORT)
+                            .show()
                 }
-
             }
             else{
                 Log.w("MainActivity", "Pushed not playing")
@@ -109,8 +149,8 @@ class MainActivity : AppCompatActivity() {
             if(txt_hours.isChecked){
                 txt_minutes.isChecked = false
                 txt_seconds.isChecked = false
+                currentSeletedItem = CurrentStatus.HOURS.status
             }
-            Log.w("MainActivity", "hours checked?? " + txt_hours.isChecked)
         }
 
         txt_minutes.setOnClickListener {
@@ -118,8 +158,8 @@ class MainActivity : AppCompatActivity() {
             if(txt_minutes.isChecked){
                 txt_hours.isChecked = false
                 txt_seconds.isChecked = false
+                currentSeletedItem = CurrentStatus.MINUTES.status
             }
-            Log.w("MainActivity", "minutes checked?? " + txt_minutes.isChecked)
         }
 
         txt_seconds.setOnClickListener {
@@ -127,10 +167,15 @@ class MainActivity : AppCompatActivity() {
             if(txt_seconds.isChecked){
                 txt_hours.isChecked = false
                 txt_minutes.isChecked = false
+                currentSeletedItem = CurrentStatus.SECONDS.status
             }
-            Log.w("MainActivity", "seconds checked?? " + txt_seconds.isChecked)
         }
     }
+
+    private fun calculateTimeInSecond(hour:Int, minute:Int, second:Int):Int =
+            ((60 * 60 * hour) + (60 * minute) + second) * 1000
+
+    private fun TextView.getInteger():Int = Integer.parseInt(this.text as String)
 
     inner class TestBroadcastReceiver:BroadcastReceiver(){
         override fun onReceive(context: Context?, intent: Intent?) {
@@ -147,4 +192,10 @@ class MainActivity : AppCompatActivity() {
         }
 
     }
+}
+
+enum class CurrentStatus(val status:Int){
+    HOURS(1),
+    MINUTES(2),
+    SECONDS(3)
 }

@@ -14,4 +14,12 @@ class ExampleUnitTest {
     fun addition_isCorrect() {
         assertEquals(4, 2 + 2)
     }
+
+    @Test
+    fun calculateTimeInSecond(){
+        val hour = 1
+        val minute = 10
+        val second = 10
+        assertNotEquals((hour * 3600) + (minute * 60) + second, 4)
+    }
 }
