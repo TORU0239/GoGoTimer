@@ -1,7 +1,5 @@
 package my.com.toru.gogotimer.ui.main
 
-import android.databinding.BaseObservable
-import android.databinding.Bindable
 import android.databinding.ObservableBoolean
 import android.databinding.ObservableField
 import android.util.Log
@@ -23,6 +21,8 @@ class MainViewModel{
     val isHoursChecked = ObservableBoolean(false)
     val isMinutesChecked = ObservableBoolean(false)
     val isSecondsChecked = ObservableBoolean(false)
+
+    val taskName = ObservableField<String>("")
 
     init {
         hours.set(0)
@@ -95,7 +95,6 @@ class MainViewModel{
                 }
                 else{
                     hours.set(hours.get()?.plus(1))
-                    Log.w("MainViewModel", "hours:: " + hours.get())
                 }
             }
             CurrentStatus.MINUTES.status-> {
@@ -104,7 +103,6 @@ class MainViewModel{
                 }
                 else {
                     minutes.set(minutes.get()?.plus(1))
-                    Log.w("MainViewModel", "minutes:: " + minutes.get())
                 }
             }
 
@@ -114,7 +112,6 @@ class MainViewModel{
                 }
                 else {
                     seconds.set(seconds.get()?.plus(1))
-                    Log.w("MainViewModel", "seconds " + seconds.get())
                 }
             }
         }
@@ -146,10 +143,12 @@ class MainViewModel{
                                                         minutes.get()!!,
                                                         seconds.get()!!)
 
-
-//        if(ed_task.editableText.toString().isEmpty()){
-//            Toast.makeText(this@MainActivity, "MUST set task name", Toast.LENGTH_SHORT).show()
-//        }
+        Log.w("MainViewModel", "calculated time:: $alarmTime")
+        taskName.get()?.let {
+            if(it.isEmpty()){
+                Toast.makeText(view.context, "MUST set task name", Toast.LENGTH_SHORT).show()
+            }
+        }
     }
 
     private fun calculateTimeInMilliSecond(hour:Int, minute:Int, second:Int):Int =

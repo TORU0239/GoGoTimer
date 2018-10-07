@@ -5,18 +5,15 @@ import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
 import android.databinding.DataBindingUtil
-import android.os.Build
 import android.os.Bundle
 import android.support.v7.app.AppCompatActivity
 import android.util.Log
-import android.widget.Toast
 import kotlinx.android.synthetic.main.activity_main.*
 import my.com.toru.gogotimer.R
 import my.com.toru.gogotimer.app.GoGoTimerApp
 import my.com.toru.gogotimer.database.AppDatabase
 import my.com.toru.gogotimer.databinding.ActivityMainBinding
 import my.com.toru.gogotimer.model.TimerHistoryData
-import my.com.toru.gogotimer.service.TimerService
 import my.com.toru.gogotimer.util.*
 
 class MainActivity : AppCompatActivity(){
@@ -74,57 +71,6 @@ class MainActivity : AppCompatActivity(){
     private var isPlaying = false
 
     private fun initView(){
-        btn_increase_time.setOnClickListener {
-            when(currentSeletedItem){
-                CurrentStatus.HOURS.status->{
-                    if((txt_hours.text as String).toInt() == 23){
-                        Toast.makeText(this@MainActivity, "Cannot set timer more than one day", Toast.LENGTH_SHORT).show()
-                    }
-                    else{
-                        txt_hours.setFormattedDigit((Integer.parseInt(txt_hours.text as String) + 1))
-                    }
-                }
-                CurrentStatus.MINUTES.status->{
-                    if((txt_minutes.text as String).toInt() == 59){
-                        txt_minutes.setFormattedDigit(0)
-                        txt_hours.setFormattedDigit((Integer.parseInt(txt_minutes.text as String) + 1))
-                    }
-                    else{
-                        txt_minutes.setFormattedDigit((Integer.parseInt(txt_minutes.text as String) + 1))
-                    }
-                }
-                CurrentStatus.SECONDS.status->{
-                    if((txt_seconds.text as String).toInt() == 59){
-                        txt_seconds.setFormattedDigit(0)
-                        txt_minutes.setFormattedDigit((Integer.parseInt(txt_minutes.text as String) + 1))
-                    }
-                    else{
-                        txt_seconds.setFormattedDigit((Integer.parseInt(txt_seconds.text as String) + 1))
-                    }
-                }
-            }
-        }
-
-        btn_decrease_time.setOnClickListener {
-            when(currentSeletedItem){
-                CurrentStatus.HOURS.status->{
-                    if((txt_hours.text as String).toInt() > 0){
-                        txt_hours.setFormattedDigit((Integer.parseInt(txt_hours.text as String) - 1))
-                    }
-                }
-                CurrentStatus.MINUTES.status->{
-                    if((txt_minutes.text as String).toInt() > 0){
-                        txt_minutes.setFormattedDigit((Integer.parseInt(txt_minutes.text as String) - 1))
-                    }
-                }
-                CurrentStatus.SECONDS.status->{
-                    if((txt_seconds.text as String).toInt() > 0){
-                        txt_seconds.setFormattedDigit((Integer.parseInt(txt_seconds.text as String) - 1))
-                    }
-                }
-            }
-        }
-
 //        btn_trigger_timer.setOnClickListener {
 //            if(!isPlaying){
 //                Log.w(TAG, "Pushed playing")
