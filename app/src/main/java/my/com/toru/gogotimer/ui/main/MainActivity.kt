@@ -8,24 +8,25 @@ import android.os.Build
 import android.os.Bundle
 import android.support.v7.app.AlertDialog
 import android.support.v7.app.AppCompatActivity
-import android.text.Editable
-import android.text.TextWatcher
 import android.util.Log
+import android.view.inputmethod.EditorInfo
 import android.widget.TextView
 import android.widget.Toast
 import kotlinx.android.synthetic.main.activity_main.*
 import my.com.toru.gogotimer.R
+import my.com.toru.gogotimer.app.GoGoTimerApp
 import my.com.toru.gogotimer.database.AppDatabase
 import my.com.toru.gogotimer.model.TimerHistoryData
 import my.com.toru.gogotimer.service.TimerService
-import my.com.toru.gogotimer.ui.history.HistoryActivity
+import my.com.toru.gogotimer.ui.history.HistoryFragment
+import my.com.toru.gogotimer.util.*
 
-class MainActivity : AppCompatActivity() {
+class MainActivity : AppCompatActivity(){
     companion object {
         private val TAG = MainActivity::class.java.simpleName
     }
 
-    private lateinit var receiver: TestBroadcastReceiver
+    private lateinit var receiver: TimerReceiver
 
     private var currentSeletedItem = -1
 
@@ -34,7 +35,7 @@ class MainActivity : AppCompatActivity() {
         setContentView(R.layout.activity_main)
         Log.w("MainActivity", "onCreate")
         initView()
-        receiver = TestBroadcastReceiver()
+        receiver = TimerReceiver()
     }
 
     override fun onResume() {
@@ -42,10 +43,15 @@ class MainActivity : AppCompatActivity() {
         Log.w("MainActivity", "onResume")
         val intentFilter = IntentFilter()
         intentFilter.apply {
-            addAction("com.my.toru.UPDATE")
-            addAction("com.my.toru.FINISHED")
+            addAction(CONST_UPDATE)
+            addAction(CONST_FINISHED)
         }
         registerReceiver(receiver, intentFilter)
+    }
+
+    override fun onSaveInstanceState(outState: Bundle?) {
+        super.onSaveInstanceState(outState)
+        Log.w(TAG, "onSaveInstanceState")
     }
 
     override fun onRestoreInstanceState(savedInstanceState: Bundle?) {
@@ -56,6 +62,15 @@ class MainActivity : AppCompatActivity() {
     override fun onPause() {
         unregisterReceiver(receiver)
         super.onPause()
+    }
+
+    override fun onBackPressed() {
+        if(supportFragmentManager.fragments.size > 0){
+            supportFragmentManager.popBackStack()
+        }
+        else{
+            super.onBackPressed()
+        }
     }
 
     private var isPlaying = false
@@ -73,7 +88,11 @@ class MainActivity : AppCompatActivity() {
         }
 
         tlb_history.setOnClickListener {
-            startActivity(Intent(this@MainActivity, HistoryActivity::class.java))
+            supportFragmentManager.beginTransaction()
+                                .replace(R.id.main_container, HistoryFragment.newInstance())
+                                .addToBackStack("HISTORY")
+                                .commitAllowingStateLoss()
+            Util.hideSoftKeyboard(ed_task)
         }
 
         btn_increase_time.setOnClickListener {
@@ -128,14 +147,13 @@ class MainActivity : AppCompatActivity() {
         }
 
         ed_task.apply{
-            addTextChangedListener(object: TextWatcher {
-                override fun afterTextChanged(e: Editable?) {}
-
-                override fun beforeTextChanged(p0: CharSequence?, p1: Int, p2: Int, p3: Int) {}
-
-                override fun onTextChanged(p0: CharSequence?, p1: Int, p2: Int, p3: Int) {}
-            })
-            setOnEditorActionListener { p0, p1, p2 -> true}
+            setOnEditorActionListener { v, actionId, _ ->
+                if(actionId == EditorInfo.IME_ACTION_DONE){
+                    Log.w(TAG, "correct")
+                    true
+                }
+                false
+            }
         }
 
         btn_trigger_timer.setOnClickListener {
@@ -155,7 +173,8 @@ class MainActivity : AppCompatActivity() {
                         btn_trigger_timer.setImageResource(R.drawable.ic_outline_pause_24px)
 
                         val intent = Intent(this@MainActivity, TimerService::class.java)
-                        intent.putExtra("SECOND", alarmTime)
+                                        .putExtra("SECOND", alarmTime)
+
                         if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.O){
                             startForegroundService(intent)
                         }
@@ -175,7 +194,6 @@ class MainActivity : AppCompatActivity() {
                             insertData(historyData)
                             Log.w(TAG, "total Size:: ${getAll().size}")
                         }
-
 
                         txt_hours.isChecked = false
                         txt_minutes.isChecked = false
@@ -224,50 +242,38 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    private fun TextView.setFormattedDigit(digit:Int){
-        this.text = String.format("%1$02d", digit)
-    }
-
-    // TODO:
     private fun calculateTimeInMilliSecond(hour:Int, minute:Int, second:Int):Int =
             ((60 * 60 * hour) + (60 * minute) + second) * 1000
 
     private fun TextView.getInteger():Int = Integer.parseInt(this.text as String)
 
-    inner class TestBroadcastReceiver:BroadcastReceiver(){
+    private fun TextView.setFormattedDigit(digit:Int){
+        this.text = String.format("%1$02d", digit)
+    }
+
+    inner class TimerReceiver : BroadcastReceiver() {
         override fun onReceive(context: Context?, intent: Intent?) {
-            Log.w("MainActivity", "update")
             when(intent?.action){
-                "com.my.toru.UPDATE"->{
+                CONST_UPDATE ->{
                     Log.w(TAG, "update")
-                    txt_seconds.setFormattedDigit(intent.getIntExtra("UPDATE", -1))
+                    txt_hours.setFormattedDigit(intent.getIntExtra(CONST_HOURS, -1))
+                    txt_minutes.setFormattedDigit(intent.getIntExtra(CONST_MINUTES, -1))
+                    txt_seconds.setFormattedDigit(intent.getIntExtra(CONST_SECONDS, -1))
                 }
-                "com.my.toru.FINISHED"->{
+                CONST_FINISHED -> {
+                    Log.w(TAG, "finished")
                     btn_trigger_timer.setImageResource(R.drawable.ic_outline_arrow_forward_ios_24px)
-                    val db = AppDatabase.getInstance(this@MainActivity)
+                    val db = AppDatabase.getInstance(GoGoTimerApp.applicationContext())
                     val dao = db?.timerHistoryDao()
                     val historyData = TimerHistoryData()
                     historyData.apply {
                         taskName = ed_task.editableText.toString()
                         taskEndTimeStamp = System.currentTimeMillis()
                     }
-
-                    dao?.let{
-                        it.insertData(historyData)
-                        Log.w(TAG, "total Size:: ${it.getAll().size}")
-                    }
-
+                    dao?.insertData(historyData)
                 }
-                else->{
-                    Log.w(TAG, "WTF???")
-                }
+                else-> Log.w(TAG, "WTF???")
             }
         }
     }
-}
-
-enum class CurrentStatus(val status:Int){
-    HOURS(1),
-    MINUTES(2),
-    SECONDS(3)
 }

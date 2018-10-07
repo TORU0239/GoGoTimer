@@ -10,7 +10,6 @@
         xmlns:tools="http://schemas.android.com/tools"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:background="@drawable/focused_bg"
         android:padding="16dp">
 
         <ImageView
@@ -28,7 +27,7 @@
             android:layout_marginLeft="10dp"
             android:text="@{historyModel.taskName}"
             android:textSize="18sp"
-            android:textColor="@android:color/black"
+            android:textColor="@android:color/white"
             tools:text="08/10/2018"
             app:layout_constraintLeft_toRightOf="@id/img_alarm"
             app:layout_constraintTop_toTopOf="parent"
@@ -40,6 +39,8 @@
             android:layout_height="wrap_content"
             android:layout_marginLeft="10dp"
             android:layout_marginTop="2dp"
+            android:textSize="14sp"
+            android:textColor="@android:color/white"
             tools:text="test"
             app:timeStamp="@{historyModel}"
             app:layout_constraintLeft_toRightOf="@id/img_alarm"

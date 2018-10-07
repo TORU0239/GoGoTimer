@@ -14,6 +14,7 @@ import android.support.v4.app.NotificationCompat
 import android.util.Log
 import my.com.toru.gogotimer.R
 import my.com.toru.gogotimer.ui.main.MainActivity
+import my.com.toru.gogotimer.util.*
 
 
 class TimerService : Service() {
@@ -28,17 +29,13 @@ class TimerService : Service() {
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         Log.w("TimerService", "onStartCommand")
+
         val second = intent?.getIntExtra("SECOND", 0)!!
-        Log.w("TimerService", "second:: $second")
         if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.O){
             val noti = NotificationCompat.Builder(this, "GOGOTIMER_CHANNEL")
-            noti.setSmallIcon(R.mipmap.ic_launcher)
-                .setContentText("GoGoTimer")
-                .setContentTitle("My notification")
-                .setContentText("Hello World!")
-                .setAutoCancel(true)
-                .priority = NotificationCompat.PRIORITY_LOW
-            startForeground(1004, noti.build())
+            val notification = noti.generate("GoGoTimer", "AlarmStarted", NotificationCompat.PRIORITY_LOW)
+                                            .build()
+            startForeground(1004, notification)
         }
 
         val msg = Message()
@@ -57,33 +54,33 @@ class TimerService : Service() {
                 1024->{
                     if(msg.arg1 == 0){
                         Log.w("TimerService", "handler finished!!")
-                        val intent = Intent(this@TimerService, MainActivity::class.java)
-                                                .addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP)
+                        val intent = Intent(this@TimerService, MainActivity::class.java).addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP)
                         val pendingIntent = PendingIntent.getActivity(this@TimerService, 1, intent, PendingIntent.FLAG_UPDATE_CURRENT)
                         val noti = NotificationCompat.Builder(this@TimerService, "GOGOTIMER_CHANNEL")
                         noti.setSmallIcon(R.mipmap.ic_launcher)
-                                .setContentText("GoGoTimer")
-                                .setContentTitle("My notification")
+                                .setContentTitle("GoGoTimer")
                                 .setContentText("Alarm Finished!!!")
                                 .setVibrate(longArrayOf(0))
                                 .setAutoCancel(true)
-                                .setTicker("My Notification")
+                                .setTicker("Alarm Finished!!!")
                                 .setFullScreenIntent(pendingIntent, true)
                                 .priority = NotificationCompat.PRIORITY_MAX
 
                         val notiManager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
                         notiManager.notify(1024, noti.build())
-                        sendBroadcast(Intent("com.my.toru.FINISHED"))
+                        sendBroadcast(Intent(CONST_FINISHED))
                         stopSelf()
                     }
                     else{
-                        Log.w("TimerService", "handler!!")
-
                         val newMsg = Message()
                         newMsg.apply {
                             what = 1024
                             arg1 = (msg.arg1 - 1000)
-                            sendBroadcast(Intent("com.my.toru.UPDATE").putExtra("UPDATE", (msg.arg1 - 1000) / 1000))
+                            val intent = Intent(CONST_UPDATE)
+                            intent.putExtra(CONST_HOURS, ((msg.arg1 - 1000) / 1000) / 3600)
+                            intent.putExtra(CONST_MINUTES, ((msg.arg1 - 1000) / 1000) / 60)
+                            intent.putExtra(CONST_SECONDS, ((msg.arg1 - 1000) / 1000) % 60)
+                            sendBroadcast(intent)
                         }
                         sendMessageDelayed(newMsg, 1000)
                     }
@@ -99,4 +96,13 @@ class TimerService : Service() {
         super.onDestroy()
         handler.removeMessages(1024)
     }
+
+    private fun NotificationCompat.Builder.generate(contentTxt:String,
+                                                    contentTitle:String,
+                                                    priority:Int):NotificationCompat.Builder
+            = this.setSmallIcon(R.mipmap.ic_launcher)
+            .setContentText(contentTxt)
+            .setContentTitle(contentTitle)
+            .setAutoCancel(true)
+            .setPriority(priority)
 }
