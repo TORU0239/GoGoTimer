@@ -19,6 +19,7 @@ import my.com.toru.gogotimer.database.AppDatabase
 import my.com.toru.gogotimer.model.TimerHistoryData
 import my.com.toru.gogotimer.service.TimerService
 import my.com.toru.gogotimer.ui.history.HistoryActivity
+import my.com.toru.gogotimer.util.CurrentStatus
 
 class MainActivity : AppCompatActivity() {
     companion object {
@@ -240,7 +241,10 @@ class MainActivity : AppCompatActivity() {
             when(intent?.action){
                 "com.my.toru.UPDATE"->{
                     Log.w(TAG, "update")
-                    txt_seconds.setFormattedDigit(intent.getIntExtra("UPDATE", -1))
+
+                    txt_hours.setFormattedDigit(intent.getIntExtra("HOURS", -1))
+                    txt_minutes.setFormattedDigit(intent.getIntExtra("MINUTES", -1))
+                    txt_seconds.setFormattedDigit(intent.getIntExtra("SECONDS", -1))
                 }
                 "com.my.toru.FINISHED"->{
                     btn_trigger_timer.setImageResource(R.drawable.ic_outline_arrow_forward_ios_24px)
@@ -256,7 +260,6 @@ class MainActivity : AppCompatActivity() {
                         it.insertData(historyData)
                         Log.w(TAG, "total Size:: ${it.getAll().size}")
                     }
-
                 }
                 else->{
                     Log.w(TAG, "WTF???")
@@ -264,10 +267,4 @@ class MainActivity : AppCompatActivity() {
             }
         }
     }
-}
-
-enum class CurrentStatus(val status:Int){
-    HOURS(1),
-    MINUTES(2),
-    SECONDS(3)
 }

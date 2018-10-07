@@ -35,7 +35,7 @@ class TimerService : Service() {
             noti.setSmallIcon(R.mipmap.ic_launcher)
                 .setContentText("GoGoTimer")
                 .setContentTitle("My notification")
-                .setContentText("Hello World!")
+                .setContentText("Alarm Started!!")
                 .setAutoCancel(true)
                 .priority = NotificationCompat.PRIORITY_LOW
             startForeground(1004, noti.build())
@@ -63,7 +63,7 @@ class TimerService : Service() {
                         val noti = NotificationCompat.Builder(this@TimerService, "GOGOTIMER_CHANNEL")
                         noti.setSmallIcon(R.mipmap.ic_launcher)
                                 .setContentText("GoGoTimer")
-                                .setContentTitle("My notification")
+                                .setContentTitle("Timer Notification")
                                 .setContentText("Alarm Finished!!!")
                                 .setVibrate(longArrayOf(0))
                                 .setAutoCancel(true)
@@ -77,13 +77,15 @@ class TimerService : Service() {
                         stopSelf()
                     }
                     else{
-                        Log.w("TimerService", "handler!!")
-
                         val newMsg = Message()
                         newMsg.apply {
                             what = 1024
                             arg1 = (msg.arg1 - 1000)
-                            sendBroadcast(Intent("com.my.toru.UPDATE").putExtra("UPDATE", (msg.arg1 - 1000) / 1000))
+                            val intent = Intent("com.my.toru.UPDATE")
+                            intent.putExtra("HOURS", ((msg.arg1 - 1000) / 1000) / 3600)
+                            intent.putExtra("MINUTES", ((msg.arg1 - 1000) / 1000) / 60)
+                            intent.putExtra("SECONDS", ((msg.arg1 - 1000) / 1000) % 60)
+                            sendBroadcast(intent)
                         }
                         sendMessageDelayed(newMsg, 1000)
                     }

@@ -23,7 +23,7 @@
 
         <activity android:name=".ui.history.HistoryActivity"
             android:screenOrientation="portrait"
-            android:theme="@style/AppTheme"/>
+            android:theme="@style/AppTheme.NoStatusBar"/>
         <service
             android:name=".service.TimerService"
             android:enabled="true"

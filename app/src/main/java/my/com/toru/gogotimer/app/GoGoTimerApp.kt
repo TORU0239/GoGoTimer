@@ -1,5 +1,6 @@
 package my.com.toru.gogotimer.app
 
+import android.annotation.SuppressLint
 import android.app.Application
 import android.app.NotificationChannel
 import android.app.NotificationManager
@@ -7,6 +8,18 @@ import android.content.Context
 import android.os.Build
 
 class GoGoTimerApp : Application() {
+
+    init {
+        instance = this
+    }
+
+    companion object {
+        private var instance: GoGoTimerApp? = null
+
+        fun applicationContext() : Context {
+            return instance!!.applicationContext
+        }
+    }
     override fun onCreate() {
         super.onCreate()
         configureNotificationChannel()
