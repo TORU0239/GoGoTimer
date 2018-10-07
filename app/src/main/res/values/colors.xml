@@ -11,5 +11,8 @@
     <color name="startNoItemGradient">#f4511e</color>
     <color name="endNoItemGradient">#ffab91</color>
 
+    <color name="startMyInfoGradient">#afb42b</color>
+    <color name="endMyInfoGradient">#dce775</color>
+
     <color name="time_focused_color">#22000000</color>
 </resources>

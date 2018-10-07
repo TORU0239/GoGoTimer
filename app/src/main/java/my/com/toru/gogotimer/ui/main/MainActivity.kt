@@ -10,7 +10,6 @@ import android.support.v7.app.AlertDialog
 import android.support.v7.app.AppCompatActivity
 import android.util.Log
 import android.view.inputmethod.EditorInfo
-import android.widget.TextView
 import android.widget.Toast
 import kotlinx.android.synthetic.main.activity_main.*
 import my.com.toru.gogotimer.R
@@ -19,6 +18,7 @@ import my.com.toru.gogotimer.database.AppDatabase
 import my.com.toru.gogotimer.model.TimerHistoryData
 import my.com.toru.gogotimer.service.TimerService
 import my.com.toru.gogotimer.ui.history.HistoryFragment
+import my.com.toru.gogotimer.ui.info.MyInfoFragment
 import my.com.toru.gogotimer.util.*
 
 class MainActivity : AppCompatActivity(){
@@ -77,14 +77,17 @@ class MainActivity : AppCompatActivity(){
 
     private fun initView(){
         tlb_info.setOnClickListener {
-
-            val dialog = AlertDialog.Builder(this@MainActivity)
-            dialog.setTitle("User Info")
-                    .setMessage("Created by Toru Wonyoung Choi")
-                    .setNeutralButton("Dismiss") { dialogInterface, p1 ->
-                        dialogInterface.dismiss()
-                    }
-                    .create().show()
+//            val dialog = AlertDialog.Builder(this@MainActivity)
+//            dialog.setTitle("User Info")
+//                    .setMessage("Created by Toru Wonyoung Choi")
+//                    .setNeutralButton("Dismiss") { dialogInterface, p1 ->
+//                        dialogInterface.dismiss()
+//                    }
+//                    .create().show()
+            supportFragmentManager.beginTransaction()
+                    .replace(R.id.main_container, MyInfoFragment())
+                    .addToBackStack("MYINFO")
+                    .commitAllowingStateLoss()
         }
 
         tlb_history.setOnClickListener {
@@ -244,12 +247,6 @@ class MainActivity : AppCompatActivity(){
 
     private fun calculateTimeInMilliSecond(hour:Int, minute:Int, second:Int):Int =
             ((60 * 60 * hour) + (60 * minute) + second) * 1000
-
-    private fun TextView.getInteger():Int = Integer.parseInt(this.text as String)
-
-    private fun TextView.setFormattedDigit(digit:Int){
-        this.text = String.format("%1$02d", digit)
-    }
 
     inner class TimerReceiver : BroadcastReceiver() {
         override fun onReceive(context: Context?, intent: Intent?) {
