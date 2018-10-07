@@ -4,21 +4,19 @@ import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
+import android.databinding.DataBindingUtil
 import android.os.Build
 import android.os.Bundle
-import android.support.v7.app.AlertDialog
 import android.support.v7.app.AppCompatActivity
 import android.util.Log
-import android.view.inputmethod.EditorInfo
 import android.widget.Toast
 import kotlinx.android.synthetic.main.activity_main.*
 import my.com.toru.gogotimer.R
 import my.com.toru.gogotimer.app.GoGoTimerApp
 import my.com.toru.gogotimer.database.AppDatabase
+import my.com.toru.gogotimer.databinding.ActivityMainBinding
 import my.com.toru.gogotimer.model.TimerHistoryData
 import my.com.toru.gogotimer.service.TimerService
-import my.com.toru.gogotimer.ui.history.HistoryFragment
-import my.com.toru.gogotimer.ui.info.MyInfoFragment
 import my.com.toru.gogotimer.util.*
 
 class MainActivity : AppCompatActivity(){
@@ -32,8 +30,8 @@ class MainActivity : AppCompatActivity(){
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_main)
-        Log.w("MainActivity", "onCreate")
+        val mainBinding: ActivityMainBinding = DataBindingUtil.setContentView(this, R.layout.activity_main)
+        mainBinding.mainViewModel = MainViewModel()
         initView()
         receiver = TimerReceiver()
     }
@@ -76,28 +74,6 @@ class MainActivity : AppCompatActivity(){
     private var isPlaying = false
 
     private fun initView(){
-        tlb_info.setOnClickListener {
-//            val dialog = AlertDialog.Builder(this@MainActivity)
-//            dialog.setTitle("User Info")
-//                    .setMessage("Created by Toru Wonyoung Choi")
-//                    .setNeutralButton("Dismiss") { dialogInterface, p1 ->
-//                        dialogInterface.dismiss()
-//                    }
-//                    .create().show()
-            supportFragmentManager.beginTransaction()
-                    .replace(R.id.main_container, MyInfoFragment())
-                    .addToBackStack("MYINFO")
-                    .commitAllowingStateLoss()
-        }
-
-        tlb_history.setOnClickListener {
-            supportFragmentManager.beginTransaction()
-                                .replace(R.id.main_container, HistoryFragment.newInstance())
-                                .addToBackStack("HISTORY")
-                                .commitAllowingStateLoss()
-            Util.hideSoftKeyboard(ed_task)
-        }
-
         btn_increase_time.setOnClickListener {
             when(currentSeletedItem){
                 CurrentStatus.HOURS.status->{
@@ -149,104 +125,64 @@ class MainActivity : AppCompatActivity(){
             }
         }
 
-        ed_task.apply{
-            setOnEditorActionListener { v, actionId, _ ->
-                if(actionId == EditorInfo.IME_ACTION_DONE){
-                    Log.w(TAG, "correct")
-                    true
-                }
-                false
-            }
-        }
-
-        btn_trigger_timer.setOnClickListener {
-            if(!isPlaying){
-                Log.w(TAG, "Pushed playing")
-                val alarmTime = calculateTimeInMilliSecond(txt_hours.getInteger(),
-                                                                txt_minutes.getInteger(),
-                                                                txt_seconds.getInteger())
-                Log.w(TAG, "alarmTime::${alarmTime * 1000}")
-
-                if(ed_task.editableText.toString().isEmpty()){
-                    Toast.makeText(this@MainActivity, "MUST set task name", Toast.LENGTH_SHORT).show()
-                }
-                else{
-                    if(alarmTime > 0){
-                        isPlaying = true
-                        btn_trigger_timer.setImageResource(R.drawable.ic_outline_pause_24px)
-
-                        val intent = Intent(this@MainActivity, TimerService::class.java)
-                                        .putExtra("SECOND", alarmTime)
-
-                        if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.O){
-                            startForegroundService(intent)
-                        }
-                        else{
-                            startService(intent)
-                        }
-
-                        val db = AppDatabase.getInstance(this@MainActivity)
-                        val dao = db?.timerHistoryDao()
-                        val historyData = TimerHistoryData()
-                        historyData.apply {
-                            taskName = ed_task.editableText.toString()
-                            taskStartTimeStamp = System.currentTimeMillis()
-                        }
-
-                        dao?.apply {
-                            insertData(historyData)
-                            Log.w(TAG, "total Size:: ${getAll().size}")
-                        }
-
-                        txt_hours.isChecked = false
-                        txt_minutes.isChecked = false
-                        txt_seconds.isChecked = false
-                    }
-                    else{
-                        Toast.makeText(this@MainActivity, "MUST set timer more than 0 second", Toast.LENGTH_SHORT)
-                                .show()
-                    }
-                }
-            }
-            else{
-                Log.w("MainActivity", "Pushed not playing")
-                isPlaying = false
-                btn_trigger_timer.setImageResource(R.drawable.ic_outline_arrow_forward_ios_24px)
-                val intent = Intent(this@MainActivity, TimerService::class.java)
-                stopService(intent)
-            }
-        }
-
-        txt_hours.setOnClickListener {
-            txt_hours.isChecked = !txt_hours.isChecked
-            if(txt_hours.isChecked){
-                txt_minutes.isChecked = false
-                txt_seconds.isChecked = false
-                currentSeletedItem = CurrentStatus.HOURS.status
-            }
-        }
-
-        txt_minutes.setOnClickListener {
-            txt_minutes.isChecked = !txt_minutes.isChecked
-            if(txt_minutes.isChecked){
-                txt_hours.isChecked = false
-                txt_seconds.isChecked = false
-                currentSeletedItem = CurrentStatus.MINUTES.status
-            }
-        }
-
-        txt_seconds.setOnClickListener {
-            txt_seconds.isChecked = !txt_seconds.isChecked
-            if(txt_seconds.isChecked){
-                txt_hours.isChecked = false
-                txt_minutes.isChecked = false
-                currentSeletedItem = CurrentStatus.SECONDS.status
-            }
-        }
+//        btn_trigger_timer.setOnClickListener {
+//            if(!isPlaying){
+//                Log.w(TAG, "Pushed playing")
+//                val alarmTime = calculateTimeInMilliSecond(txt_hours.getInteger(),
+//                                                                txt_minutes.getInteger(),
+//                                                                txt_seconds.getInteger())
+//                Log.w(TAG, "alarmTime::${alarmTime * 1000}")
+//
+//                if(ed_task.editableText.toString().isEmpty()){
+//                    Toast.makeText(this@MainActivity, "MUST set task name", Toast.LENGTH_SHORT).show()
+//                }
+//                else{
+//                    if(alarmTime > 0){
+//                        isPlaying = true
+//                        btn_trigger_timer.setImageResource(R.drawable.ic_outline_pause_24px)
+//
+//                        val intent = Intent(this@MainActivity, TimerService::class.java)
+//                                        .putExtra("SECOND", alarmTime)
+//
+//                        if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.O){
+//                            startForegroundService(intent)
+//                        }
+//                        else{
+//                            startService(intent)
+//                        }
+//
+//                        val db = AppDatabase.getInstance(this@MainActivity)
+//                        val dao = db?.timerHistoryDao()
+//                        val historyData = TimerHistoryData()
+//                        historyData.apply {
+//                            taskName = ed_task.editableText.toString()
+//                            taskStartTimeStamp = System.currentTimeMillis()
+//                        }
+//
+//                        dao?.apply {
+//                            insertData(historyData)
+//                            Log.w(TAG, "total Size:: ${getAll().size}")
+//                        }
+//
+//                        txt_hours.isChecked = false
+//                        txt_minutes.isChecked = false
+//                        txt_seconds.isChecked = false
+//                    }
+//                    else{
+//                        Toast.makeText(this@MainActivity, "MUST set timer more than 0 second", Toast.LENGTH_SHORT)
+//                                .show()
+//                    }
+//                }
+//            }
+//            else{
+//                Log.w("MainActivity", "Pushed not playing")
+//                isPlaying = false
+//                btn_trigger_timer.setImageResource(R.drawable.ic_outline_arrow_forward_ios_24px)
+//                val intent = Intent(this@MainActivity, TimerService::class.java)
+//                stopService(intent)
+//            }
+//        }
     }
-
-    private fun calculateTimeInMilliSecond(hour:Int, minute:Int, second:Int):Int =
-            ((60 * 60 * hour) + (60 * minute) + second) * 1000
 
     inner class TimerReceiver : BroadcastReceiver() {
         override fun onReceive(context: Context?, intent: Intent?) {

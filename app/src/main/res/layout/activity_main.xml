@@ -1,134 +1,151 @@
 <?xml version="1.0" encoding="utf-8"?>
-<android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
-    android:id="@+id/main_container"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    tools:context=".ui.main.MainActivity"
-    android:background="@drawable/full_main_background">
-
-    <ImageView
-        android:id="@+id/tlb_info"
-        android:layout_width="36dp"
-        android:layout_height="36dp"
-        android:layout_marginTop="16dp"
-        android:layout_marginLeft="16dp"
-        android:src="@drawable/ic_outline_info_24px"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintLeft_toLeftOf="parent"/>
-
-    <ImageView
-        android:id="@+id/tlb_history"
-        android:layout_width="36dp"
-        android:layout_height="36dp"
-        android:layout_marginTop="16dp"
-        android:layout_marginEnd="16dp"
-        android:src="@drawable/ic_outline_history_24px"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintRight_toRightOf="parent"/>
-
-    <android.support.constraint.ConstraintLayout
-        android:id="@+id/rl_main_alarm"
-        android:layout_width="210dp"
-        android:layout_height="210dp"
-        android:background="@drawable/shape_circle"
-        app:layout_constraintLeft_toLeftOf="parent"
-        app:layout_constraintRight_toRightOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintBottom_toBottomOf="parent">
-
-        <CheckedTextView
-            android:id="@+id/txt_hours"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="00"
-            android:textSize="36sp"
-            android:textColor="@android:color/white"
-            android:focusable="true"
-            android:checked="false"
-            android:background="@drawable/time_focus_selector"
-            app:layout_constraintRight_toLeftOf="@+id/txt_minutes"
-            app:layout_constraintLeft_toLeftOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintBottom_toBottomOf="parent"/>
-
-        <CheckedTextView
-            android:id="@+id/txt_minutes"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="00"
-            android:textSize="36sp"
-            android:textColor="@android:color/white"
-            android:focusable="true"
-            android:checked="false"
-            android:background="@drawable/time_focus_selector"
-            app:layout_constraintLeft_toLeftOf="parent"
-            app:layout_constraintRight_toRightOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintBottom_toBottomOf="parent"/>
-
-        <CheckedTextView
-            android:id="@+id/txt_seconds"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="00"
-            android:textSize="36sp"
-            android:textColor="@android:color/white"
-            android:focusable="true"
-            android:checked="false"
-            android:background="@drawable/time_focus_selector"
-            app:layout_constraintLeft_toRightOf="@id/txt_minutes"
-            app:layout_constraintRight_toRightOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintBottom_toBottomOf="parent"/>
+<layout>
+    <data>
+        <variable
+            name="mainViewModel"
+            type="my.com.toru.gogotimer.ui.main.MainViewModel"/>
+    </data>
+    <android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+        xmlns:app="http://schemas.android.com/apk/res-auto"
+        xmlns:tools="http://schemas.android.com/tools"
+        android:id="@+id/main_container"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        tools:context=".ui.main.MainActivity"
+        android:background="@drawable/full_main_background">
 
         <ImageView
-            android:id="@+id/btn_increase_time"
-            android:layout_width="48dp"
-            android:layout_height="48dp"
-            android:layout_marginTop="10dp"
-            android:src="@drawable/ic_outline_expand_less_24px"
-            app:layout_constraintLeft_toLeftOf="parent"
-            app:layout_constraintRight_toRightOf="parent"
-            app:layout_constraintTop_toTopOf="parent" />
+            android:id="@+id/tlb_info"
+            android:layout_width="36dp"
+            android:layout_height="36dp"
+            android:layout_marginTop="16dp"
+            android:layout_marginLeft="16dp"
+            android:src="@drawable/ic_outline_info_24px"
+            android:onClick="@{mainViewModel::goInfomation}"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintLeft_toLeftOf="parent"/>
 
         <ImageView
-            android:id="@+id/btn_decrease_time"
-            android:layout_width="48dp"
-            android:layout_height="48dp"
-            android:layout_marginBottom="10dp"
-            android:src="@drawable/ic_outline_expand_more_24px"
+            android:id="@+id/tlb_history"
+            android:layout_width="36dp"
+            android:layout_height="36dp"
+            android:layout_marginTop="16dp"
+            android:layout_marginEnd="16dp"
+            android:src="@drawable/ic_outline_history_24px"
+            android:onClick="@{mainViewModel::goHistory}"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintRight_toRightOf="parent"/>
+
+        <android.support.constraint.ConstraintLayout
+            android:id="@+id/rl_main_alarm"
+            android:layout_width="210dp"
+            android:layout_height="210dp"
+            android:background="@drawable/shape_circle"
             app:layout_constraintLeft_toLeftOf="parent"
             app:layout_constraintRight_toRightOf="parent"
-            app:layout_constraintBottom_toBottomOf="parent"/>
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent">
 
+
+            <CheckedTextView
+                android:id="@+id/txt_hours"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                app:digit="@{mainViewModel.hours}"
+                android:textSize="36sp"
+                android:textColor="@android:color/white"
+                android:focusable="true"
+                android:background="@drawable/time_focus_selector"
+                android:onClick="@{mainViewModel::clickHours}"
+                android:checked="@{mainViewModel.isHoursChecked}"
+                app:layout_constraintRight_toLeftOf="@+id/txt_minutes"
+                app:layout_constraintLeft_toLeftOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintBottom_toBottomOf="parent"/>
+
+            <CheckedTextView
+                android:id="@+id/txt_minutes"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                app:digit="@{mainViewModel.minutes}"
+                android:textSize="36sp"
+                android:textColor="@android:color/white"
+                android:focusable="true"
+                android:background="@drawable/time_focus_selector"
+                android:onClick="@{mainViewModel::clickMinutes}"
+                android:checked="@{mainViewModel.isMinutesChecked}"
+                app:layout_constraintLeft_toLeftOf="parent"
+                app:layout_constraintRight_toRightOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintBottom_toBottomOf="parent"/>
+
+            <CheckedTextView
+                android:id="@+id/txt_seconds"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textSize="36sp"
+                android:textColor="@android:color/white"
+                android:focusable="true"
+                android:background="@drawable/time_focus_selector"
+                android:onClick="@{mainViewModel::clickSeconds}"
+                android:checked="@{mainViewModel.isSecondsChecked}"
+                app:digit="@{mainViewModel.seconds}"
+                app:layout_constraintLeft_toRightOf="@id/txt_minutes"
+                app:layout_constraintRight_toRightOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintBottom_toBottomOf="parent"/>
+
+            <ImageView
+                android:id="@+id/btn_increase_time"
+                android:layout_width="48dp"
+                android:layout_height="48dp"
+                android:layout_marginTop="10dp"
+                android:src="@drawable/ic_outline_expand_less_24px"
+                android:onClick="@{mainViewModel::increaseTime}"
+                app:layout_constraintLeft_toLeftOf="parent"
+                app:layout_constraintRight_toRightOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
+
+            <ImageView
+                android:id="@+id/btn_decrease_time"
+                android:layout_width="48dp"
+                android:layout_height="48dp"
+                android:layout_marginBottom="10dp"
+                android:src="@drawable/ic_outline_expand_more_24px"
+                android:onClick="@{mainViewModel::decreaseTime}"
+                app:layout_constraintLeft_toLeftOf="parent"
+                app:layout_constraintRight_toRightOf="parent"
+                app:layout_constraintBottom_toBottomOf="parent"/>
+
+        </android.support.constraint.ConstraintLayout>
+
+        <EditText
+            android:id="@+id/ed_task"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="40dp"
+            android:maxLines="1"
+            android:inputType="text"
+            android:hint="Enter TASK"
+            android:imeOptions="actionDone"
+            android:textColorHint="@android:color/white"
+            android:background="@android:color/transparent"
+            android:textSize="30sp"
+            android:textColor="@android:color/white"
+            android:onEditorActionListener="@{mainViewModel.listener}"
+            app:layout_constraintBottom_toTopOf="@id/rl_main_alarm"
+            app:layout_constraintLeft_toLeftOf="parent"
+            app:layout_constraintRight_toRightOf="parent"/>
+
+        <ImageView
+            android:id="@+id/btn_trigger_timer"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:layout_marginTop="40dp"
+            android:src="@drawable/ic_outline_arrow_forward_ios_24px"
+            android:onClick="@{mainViewModel::triggerTimer}"
+            app:layout_constraintTop_toBottomOf="@id/rl_main_alarm"
+            app:layout_constraintLeft_toLeftOf="parent"
+            app:layout_constraintRight_toRightOf="parent"/>
     </android.support.constraint.ConstraintLayout>
-
-    <EditText
-        android:id="@+id/ed_task"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginBottom="40dp"
-        android:maxLines="1"
-        android:inputType="text"
-        android:hint="Enter TASK"
-        android:imeOptions="actionDone"
-        android:textColorHint="@android:color/white"
-        android:background="@android:color/transparent"
-        android:textSize="30sp"
-        android:textColor="@android:color/white"
-        app:layout_constraintBottom_toTopOf="@id/rl_main_alarm"
-        app:layout_constraintLeft_toLeftOf="parent"
-        app:layout_constraintRight_toRightOf="parent"/>
-
-    <ImageView
-        android:id="@+id/btn_trigger_timer"
-        android:layout_width="48dp"
-        android:layout_height="48dp"
-        android:layout_marginTop="40dp"
-        android:src="@drawable/ic_outline_arrow_forward_ios_24px"
-        app:layout_constraintTop_toBottomOf="@id/rl_main_alarm"
-        app:layout_constraintLeft_toLeftOf="parent"
-        app:layout_constraintRight_toRightOf="parent"/>
-</android.support.constraint.ConstraintLayout>
+</layout>
