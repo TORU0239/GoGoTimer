@@ -1,5 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <layout>
+    <data>
+        <variable
+            name="historyModel"
+            type="my.com.toru.gogotimer.model.TimerHistoryData"/>
+    </data>
     <android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
         xmlns:app="http://schemas.android.com/apk/res-auto"
         xmlns:tools="http://schemas.android.com/tools"
@@ -7,11 +12,13 @@
         android:layout_height="wrap_content"
         android:background="@drawable/focused_bg"
         android:padding="16dp">
+
         <ImageView
             android:id="@+id/img_alarm"
             android:layout_width="24dp"
             android:layout_height="24dp"
             android:src="@drawable/ic_baseline_alarm_on_24px"
+            app:icon="@{historyModel.taskStartTimeStamp}"
             app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintBottom_toBottomOf="parent"/>
         <TextView
@@ -19,13 +26,26 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginLeft="10dp"
-            android:text="Date:"
+            android:text="@{historyModel.taskName}"
             android:textSize="18sp"
             android:textColor="@android:color/black"
             tools:text="08/10/2018"
             app:layout_constraintLeft_toRightOf="@id/img_alarm"
             app:layout_constraintTop_toTopOf="parent"
+            />
+
+        <TextView
+            android:id="@+id/txt_trigger_time"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="10dp"
+            android:layout_marginTop="2dp"
+            tools:text="test"
+            app:timeStamp="@{historyModel}"
+            app:layout_constraintLeft_toRightOf="@id/img_alarm"
+            app:layout_constraintTop_toBottomOf="@id/txt_description"
             app:layout_constraintBottom_toBottomOf="parent"/>
+
 
     </android.support.constraint.ConstraintLayout>
 </layout>
