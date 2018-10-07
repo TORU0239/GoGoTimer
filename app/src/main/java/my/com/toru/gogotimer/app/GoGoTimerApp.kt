@@ -1,4 +1,4 @@
-package my.com.toru.gogotimer
+package my.com.toru.gogotimer.app
 
 import android.app.Application
 import android.app.NotificationChannel

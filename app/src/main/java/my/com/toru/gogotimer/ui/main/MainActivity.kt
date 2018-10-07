@@ -1,4 +1,4 @@
-package my.com.toru.gogotimer
+package my.com.toru.gogotimer.ui.main
 
 import android.content.BroadcastReceiver
 import android.content.Context
@@ -14,9 +14,18 @@ import android.util.Log
 import android.widget.TextView
 import android.widget.Toast
 import kotlinx.android.synthetic.main.activity_main.*
+import my.com.toru.gogotimer.R
+import my.com.toru.gogotimer.database.AppDatabase
+import my.com.toru.gogotimer.model.TimerHistoryData
+import my.com.toru.gogotimer.service.TimerService
+import my.com.toru.gogotimer.ui.history.HistoryActivity
 
 class MainActivity : AppCompatActivity() {
-    private lateinit var receiver:TestBroadcastReceiver
+    companion object {
+        private val TAG = MainActivity::class.java.simpleName
+    }
+
+    private lateinit var receiver: TestBroadcastReceiver
 
     private var currentSeletedItem = -1
 
@@ -31,12 +40,17 @@ class MainActivity : AppCompatActivity() {
     override fun onResume() {
         super.onResume()
         Log.w("MainActivity", "onResume")
-        registerReceiver(receiver, IntentFilter("com.my.toru.UPDATE"))
+        val intentFilter = IntentFilter()
+        intentFilter.apply {
+            addAction("com.my.toru.UPDATE")
+            addAction("com.my.toru.FINISHED")
+        }
+        registerReceiver(receiver, intentFilter)
     }
 
     override fun onRestoreInstanceState(savedInstanceState: Bundle?) {
         super.onRestoreInstanceState(savedInstanceState)
-        Log.w("MainActivity", "onRestoreInstanceState")
+        Log.w(TAG, "onRestoreInstanceState")
     }
 
     override fun onPause() {
@@ -59,7 +73,7 @@ class MainActivity : AppCompatActivity() {
         }
 
         tlb_history.setOnClickListener {
-            Toast.makeText(this@MainActivity, "Under Construction", Toast.LENGTH_SHORT).show()
+            startActivity(Intent(this@MainActivity, HistoryActivity::class.java))
         }
 
         btn_increase_time.setOnClickListener {
@@ -126,32 +140,51 @@ class MainActivity : AppCompatActivity() {
 
         btn_trigger_timer.setOnClickListener {
             if(!isPlaying){
-                Log.w("MainActivity", "Pushed playing")
+                Log.w(TAG, "Pushed playing")
                 val alarmTime = calculateTimeInMilliSecond(txt_hours.getInteger(),
                                                                 txt_minutes.getInteger(),
                                                                 txt_seconds.getInteger())
-                Log.w("MainActivity", "alarmTime::${alarmTime * 1000}")
+                Log.w(TAG, "alarmTime::${alarmTime * 1000}")
 
-                if(alarmTime > 0){
-                    isPlaying = true
-                    btn_trigger_timer.setImageResource(R.drawable.ic_outline_pause_24px)
-
-                    val intent = Intent(this@MainActivity, TimerService::class.java)
-                    intent.putExtra("SECOND", alarmTime)
-                    if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.O){
-                        startForegroundService(intent)
-                    }
-                    else{
-                        startService(intent)
-                    }
-
-                    txt_hours.isChecked = false
-                    txt_minutes.isChecked = false
-                    txt_seconds.isChecked = false
+                if(ed_task.editableText.toString().isEmpty()){
+                    Toast.makeText(this@MainActivity, "MUST set task name", Toast.LENGTH_SHORT).show()
                 }
                 else{
-                    Toast.makeText(this@MainActivity, "MUST set timer more than 0 second", Toast.LENGTH_SHORT)
-                            .show()
+                    if(alarmTime > 0){
+                        isPlaying = true
+                        btn_trigger_timer.setImageResource(R.drawable.ic_outline_pause_24px)
+
+                        val intent = Intent(this@MainActivity, TimerService::class.java)
+                        intent.putExtra("SECOND", alarmTime)
+                        if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.O){
+                            startForegroundService(intent)
+                        }
+                        else{
+                            startService(intent)
+                        }
+
+                        val db = AppDatabase.getInstance(this@MainActivity)
+                        val dao = db?.timerHistoryDao()
+                        val historyData = TimerHistoryData()
+                        historyData.apply {
+                            taskName = ed_task.editableText.toString()
+                            taskStartTimeStamp = System.currentTimeMillis()
+                        }
+
+                        dao?.apply {
+                            insertData(historyData)
+                            Log.w(TAG, "total Size:: ${getAll().size}")
+                        }
+
+
+                        txt_hours.isChecked = false
+                        txt_minutes.isChecked = false
+                        txt_seconds.isChecked = false
+                    }
+                    else{
+                        Toast.makeText(this@MainActivity, "MUST set timer more than 0 second", Toast.LENGTH_SHORT)
+                                .show()
+                    }
                 }
             }
             else{
@@ -206,14 +239,27 @@ class MainActivity : AppCompatActivity() {
             Log.w("MainActivity", "update")
             when(intent?.action){
                 "com.my.toru.UPDATE"->{
-                    Log.w("MainActivity", "update")
+                    Log.w(TAG, "update")
                     txt_seconds.setFormattedDigit(intent.getIntExtra("UPDATE", -1))
-                    if(txt_seconds.text == "00"){
-                        btn_trigger_timer.setImageResource(R.drawable.ic_outline_arrow_forward_ios_24px)
+                }
+                "com.my.toru.FINISHED"->{
+                    btn_trigger_timer.setImageResource(R.drawable.ic_outline_arrow_forward_ios_24px)
+                    val db = AppDatabase.getInstance(this@MainActivity)
+                    val dao = db?.timerHistoryDao()
+                    val historyData = TimerHistoryData()
+                    historyData.apply {
+                        taskName = ed_task.editableText.toString()
+                        taskEndTimeStamp = System.currentTimeMillis()
                     }
+
+                    dao?.let{
+                        it.insertData(historyData)
+                        Log.w(TAG, "total Size:: ${it.getAll().size}")
+                    }
+
                 }
                 else->{
-                    Log.w("MainActivity", "WTF???")
+                    Log.w(TAG, "WTF???")
                 }
             }
         }
