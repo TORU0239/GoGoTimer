@@ -28,17 +28,6 @@ private const val ARG_PARAM2 = "param2"
  *
  */
 class HistoryFragment : Fragment() {
-    // TODO: Rename and change types of parameters
-    private var param1: String? = null
-    private var param2: String? = null
-
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        arguments?.let {
-            param1 = it.getString(ARG_PARAM1)
-            param2 = it.getString(ARG_PARAM2)
-        }
-    }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
                               savedInstanceState: Bundle?): View?{
@@ -55,8 +44,14 @@ class HistoryFragment : Fragment() {
     private fun initRecyclerView(){
         val db = AppDatabase.getInstance(GoGoTimerApp.applicationContext())
         val totalDB = db?.timerHistoryDao()?.getAll()
-        rcvTimerHistory.adapter = HistoryAdapter(totalDB as ArrayList<TimerHistoryData>)
-        rcvTimerHistory.addItemDecoration(DividerItemDecoration(GoGoTimerApp.applicationContext(), DividerItemDecoration.VERTICAL))
+        if(totalDB?.size == 0){
+            ll_no_data_container.visibility = View.VISIBLE
+            fab_delete_all_history.visibility = View.GONE
+        }
+        else{
+            rcvTimerHistory.adapter = HistoryAdapter(totalDB as ArrayList<TimerHistoryData>)
+            rcvTimerHistory.addItemDecoration(DividerItemDecoration(GoGoTimerApp.applicationContext(), DividerItemDecoration.VERTICAL))
+        }
     }
 
     companion object {

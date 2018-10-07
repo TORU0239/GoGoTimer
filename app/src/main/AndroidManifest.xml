@@ -12,7 +12,8 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true">
         <activity android:name=".ui.main.MainActivity"
-            android:theme="@style/AppTheme.NoStatusBar">
+            android:theme="@style/AppTheme.NoStatusBar"
+            android:windowSoftInputMode="stateAlwaysHidden">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <action android:name="android.intent.action.VIEW" />
@@ -21,9 +22,6 @@
             </intent-filter>
         </activity>
 
-        <activity android:name=".ui.history.HistoryActivity"
-            android:screenOrientation="portrait"
-            android:theme="@style/AppTheme.NoStatusBar"/>
         <service
             android:name=".service.TimerService"
             android:enabled="true"

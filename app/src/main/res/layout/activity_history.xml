@@ -12,6 +12,23 @@
         android:layout_height="match_parent"
         android:background="@drawable/full_main_background"
         tools:context=".ui.history.HistoryActivity">
+        <LinearLayout
+            android:id="@+id/ll_no_data_container"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:background="@drawable/full_noitem_background"
+            android:visibility="gone"
+            android:gravity="center">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:text="NO SAVED DATA!!!"
+                android:textSize="30sp"
+                android:textColor="@android:color/white"
+                android:textStyle="bold"/>
+        </LinearLayout>
         <android.support.v7.widget.RecyclerView
             android:id="@+id/rcvTimerHistory"
             android:layout_width="match_parent"
