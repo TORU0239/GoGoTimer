@@ -19,6 +19,7 @@ import my.com.toru.gogotimer.database.AppDatabase
 import my.com.toru.gogotimer.model.TimerHistoryData
 import my.com.toru.gogotimer.service.TimerService
 import my.com.toru.gogotimer.ui.history.HistoryActivity
+import my.com.toru.gogotimer.ui.history.HistoryFragment
 import my.com.toru.gogotimer.util.CurrentStatus
 
 class MainActivity : AppCompatActivity() {
@@ -59,6 +60,15 @@ class MainActivity : AppCompatActivity() {
         super.onPause()
     }
 
+    override fun onBackPressed() {
+        if(supportFragmentManager.fragments.size > 0){
+            supportFragmentManager.popBackStack()
+        }
+        else{
+            super.onBackPressed()
+        }
+    }
+
     private var isPlaying = false
 
     private fun initView(){
@@ -74,7 +84,11 @@ class MainActivity : AppCompatActivity() {
         }
 
         tlb_history.setOnClickListener {
-            startActivity(Intent(this@MainActivity, HistoryActivity::class.java))
+//            startActivity(Intent(this@MainActivity, HistoryActivity::class.java))
+            supportFragmentManager.beginTransaction()
+                                .replace(R.id.main_container, HistoryFragment.newInstance())
+                                .addToBackStack("HISTORY")
+                                .commitAllowingStateLoss()
         }
 
         btn_increase_time.setOnClickListener {
