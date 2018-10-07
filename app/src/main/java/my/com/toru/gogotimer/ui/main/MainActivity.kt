@@ -18,7 +18,6 @@ import my.com.toru.gogotimer.R
 import my.com.toru.gogotimer.database.AppDatabase
 import my.com.toru.gogotimer.model.TimerHistoryData
 import my.com.toru.gogotimer.service.TimerService
-import my.com.toru.gogotimer.ui.history.HistoryActivity
 import my.com.toru.gogotimer.ui.history.HistoryFragment
 import my.com.toru.gogotimer.util.CurrentStatus
 

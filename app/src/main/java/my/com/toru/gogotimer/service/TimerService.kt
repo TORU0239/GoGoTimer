@@ -32,13 +32,9 @@ class TimerService : Service() {
         Log.w("TimerService", "second:: $second")
         if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.O){
             val noti = NotificationCompat.Builder(this, "GOGOTIMER_CHANNEL")
-            noti.setSmallIcon(R.mipmap.ic_launcher)
-                .setContentText("GoGoTimer")
-                .setContentTitle("My notification")
-                .setContentText("Alarm Started!!")
-                .setAutoCancel(true)
-                .priority = NotificationCompat.PRIORITY_LOW
-            startForeground(1004, noti.build())
+            val notification = noti.generate("GoGoTimer", "AlarmStarted", NotificationCompat.PRIORITY_LOW)
+                                            .build()
+            startForeground(1004, notification)
         }
 
         val msg = Message()
@@ -62,12 +58,11 @@ class TimerService : Service() {
                         val pendingIntent = PendingIntent.getActivity(this@TimerService, 1, intent, PendingIntent.FLAG_UPDATE_CURRENT)
                         val noti = NotificationCompat.Builder(this@TimerService, "GOGOTIMER_CHANNEL")
                         noti.setSmallIcon(R.mipmap.ic_launcher)
-                                .setContentText("GoGoTimer")
-                                .setContentTitle("Timer Notification")
+                                .setContentTitle("GoGoTimer")
                                 .setContentText("Alarm Finished!!!")
                                 .setVibrate(longArrayOf(0))
                                 .setAutoCancel(true)
-                                .setTicker("My Notification")
+                                .setTicker("Alarm Finished!!!")
                                 .setFullScreenIntent(pendingIntent, true)
                                 .priority = NotificationCompat.PRIORITY_MAX
 
@@ -101,4 +96,13 @@ class TimerService : Service() {
         super.onDestroy()
         handler.removeMessages(1024)
     }
+
+    private fun NotificationCompat.Builder.generate(contentTxt:String,
+                                                    contentTitle:String,
+                                                    priority:Int):NotificationCompat.Builder
+            = this.setSmallIcon(R.mipmap.ic_launcher)
+            .setContentText(contentTxt)
+            .setContentTitle(contentTitle)
+            .setAutoCancel(true)
+            .setPriority(priority)
 }
