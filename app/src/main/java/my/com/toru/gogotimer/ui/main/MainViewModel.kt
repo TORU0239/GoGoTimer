@@ -15,6 +15,9 @@ import android.view.inputmethod.EditorInfo
 import android.widget.TextView
 import android.widget.Toast
 import my.com.toru.gogotimer.R
+import my.com.toru.gogotimer.app.GoGoTimerApp
+import my.com.toru.gogotimer.database.AppDatabase
+import my.com.toru.gogotimer.model.TimerHistoryData
 import my.com.toru.gogotimer.service.AlarmReceiver
 import my.com.toru.gogotimer.ui.history.HistoryFragment
 import my.com.toru.gogotimer.ui.info.MyInfoFragment
@@ -22,6 +25,9 @@ import my.com.toru.gogotimer.util.CurrentStatus
 import my.com.toru.gogotimer.util.Util
 
 class MainViewModel{
+    companion object {
+        private val TAG = MainViewModel::class.java.simpleName
+    }
     val hours = ObservableField<Int>()
     val minutes = ObservableField<Int>()
     val seconds = ObservableField<Int>()
@@ -30,7 +36,7 @@ class MainViewModel{
     val isMinutesChecked = ObservableBoolean(false)
     val isSecondsChecked = ObservableBoolean(false)
 
-    val taskName = ObservableField<String>("")
+    var taskNames = ObservableField<String>("")
 
     val img = ObservableBoolean(false)
 
@@ -70,7 +76,7 @@ class MainViewModel{
 
     private var currentSeletedItem = -1
 
-    fun clickHours(view:View){
+    fun clickHours(v:View) {
         isHoursChecked.set(!isHoursChecked.get())
         if(isHoursChecked.get()){
             isMinutesChecked.set(false)
@@ -79,7 +85,7 @@ class MainViewModel{
         }
     }
 
-    fun clickMinutes(view:View){
+    fun clickMinutes(v:View){
         isMinutesChecked.set(!isMinutesChecked.get())
         if(isMinutesChecked.get()){
             isHoursChecked.set(false)
@@ -88,7 +94,7 @@ class MainViewModel{
         }
     }
 
-    fun clickSeconds(view:View){
+    fun clickSeconds(v:View){
         isSecondsChecked.set(!isSecondsChecked.get())
         if(isSecondsChecked.get()){
             isHoursChecked.set(false)
@@ -154,21 +160,49 @@ class MainViewModel{
                                                         seconds.get()!!)
 
         Log.w("MainViewModel", "calculated time:: $alarmTime")
-        taskName.get()?.let {
-            if(it.isEmpty()){
-                Toast.makeText(view.context, "MUST set task name", Toast.LENGTH_SHORT).show()
+        if(!img.get()){
+            taskNames.get()?.let {
+                if(it.isEmpty()){
+                    Toast.makeText(view.context, "MUST set task name", Toast.LENGTH_SHORT).show()
+                }
+                else{
+                    if(alarmTime > 0){
+                        triggerAlarmWithCountdown(view.context, alarmTime)
+                    }
+                    else{
+                        Toast.makeText(view.context, "MUST set timer more than 0 second", Toast.LENGTH_SHORT).show()
+                    }
+                }
             }
         }
-        triggerAlarmWithAlarmManager(view.context, alarmTime)
+        else{
+            Log.w("MainViewModel", "cannot pause!!")
+        }
     }
 
-    private fun triggerAlarmWithAlarmManager(ctx:Context, alarmTime:Long){
+    lateinit var countDownTimer:TestCountDownTimer
+
+    private fun triggerAlarmWithCountdown(ctx:Context, alarmTime:Long){
+        countDownTimer = TestCountDownTimer(alarmTime, 1000)
+        countDownTimer.start()
+        img.set(true)
+        // DB에 시작시간, 끝나는 예정시간, Duration 을 박는다.
+        saveAlarmDataToDB(alarmTime)
+    }
+
+    private fun cancelAlarmManager(ctx:Context){
         val alarmManager:AlarmManager? = ctx.getSystemService(Context.ALARM_SERVICE) as AlarmManager
         val pendingIntent:PendingIntent = Intent(ctx, AlarmReceiver::class.java).let {
             PendingIntent.getBroadcast(ctx, 0 , it,0)
         }
-        Log.w("MainViewModel", "onReceive End!!!!!!!!")
+        alarmManager?.cancel(pendingIntent)
+    }
 
+    private fun triggerAlarmManager(ctx:Context, alarmTime: Long){
+        val alarmManager:AlarmManager? = ctx.getSystemService(Context.ALARM_SERVICE) as AlarmManager
+        val pendingIntent:PendingIntent = Intent(ctx, AlarmReceiver::class.java).let {
+            PendingIntent.getBroadcast(ctx, 0 , it,0)
+        }
         if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.M){
             alarmManager?.setExactAndAllowWhileIdle(AlarmManager.ELAPSED_REALTIME_WAKEUP,
                     SystemClock.elapsedRealtime() + alarmTime,
@@ -179,17 +213,77 @@ class MainViewModel{
                     SystemClock.elapsedRealtime() + alarmTime,
                     pendingIntent)
         }
-
-        val start = object:CountDownTimer(alarmTime, 1000) {
-            override fun onFinish() {}
-
-            override fun onTick(millisUntilFinished: Long) {
-                Log.w("MainViewModel", "remained time:: " + (millisUntilFinished / 1000))
-            }
-        }
-        start.start()
     }
 
     private fun calculateTimeInMilliSecond(hour:Int, minute:Int, second:Int):Long =
             (((60 * 60 * hour) + (60 * minute) + second) * 1000).toLong()
+
+    private fun saveAlarmDataToDB(alarmTime:Long){
+        val db = AppDatabase.getInstance(GoGoTimerApp.applicationContext())
+        val dao = db?.timerHistoryDao()
+        val historyData = TimerHistoryData()
+        historyData.apply {
+            taskNames.get()?.let {
+                taskName = it
+            }
+            taskStartTimeStamp = System.currentTimeMillis()
+            timerInMillisecond = alarmTime
+        }
+
+        dao?.apply {
+            insertData(historyData)
+            Log.w(TAG, "total Size:: ${getAll().size}")
+        }
+    }
+
+
+    var remainedTime:Long = 0L
+
+    inner class TestCountDownTimer(private val alarmTime: Long, private val interval:Long):CountDownTimer(alarmTime, interval){
+        override fun onFinish() {
+            img.set(false)
+        }
+
+        override fun onTick(millisUntilFinished: Long) {
+            Log.w("MainViewModel", "remained time:: " + (millisUntilFinished / 1000))
+            remainedTime = millisUntilFinished
+
+            val leftHours = (millisUntilFinished / 1000) / 3600
+            val leftMinutes = (millisUntilFinished / 1000) / 60
+            val leftSeconds = (millisUntilFinished / 1000) % 60
+
+            Log.w("MainViewModel", "hours: $leftHours, minutes: $leftMinutes, seconds: $leftSeconds")
+
+            hours.set(leftHours.toInt())
+            minutes.set(leftMinutes.toInt())
+            seconds.set(leftSeconds.toInt())
+        }
+    }
+
+    fun onResume(){
+        Log.w("MainView", "onResume")
+        // DB에서 완료시간을 가져와서 현재 시각과의 차이를 구하고 그걸 UI에 반영하며, 알람매니저를 캔슬한다.
+        val db = AppDatabase.getInstance(GoGoTimerApp.applicationContext())
+        val dao = db?.timerHistoryDao()
+        dao?.getAll()?.get(0)?.let {
+            Log.w(TAG, "current Time :: " + System.currentTimeMillis())
+            Log.w(TAG, "name:: ${it.taskName}, start: ${it.taskStartTimeStamp}, duration: ${it.timerInMillisecond}")
+
+            if(System.currentTimeMillis() < (it.taskStartTimeStamp + it.timerInMillisecond)){
+                remainedTime = ((it.taskStartTimeStamp + it.timerInMillisecond) - System.currentTimeMillis())
+                Log.w(TAG, "remained Time:: $remainedTime")
+
+                triggerAlarmWithCountdown(GoGoTimerApp.applicationContext(), remainedTime)
+                cancelAlarmManager(GoGoTimerApp.applicationContext())
+            }
+            else{
+                // DO NOTHING, already passed.
+            }
+        }
+    }
+
+    fun onPause(){
+        Log.w("MainView", "onPause")
+        triggerAlarmManager(GoGoTimerApp.applicationContext(), remainedTime)
+    }
 }

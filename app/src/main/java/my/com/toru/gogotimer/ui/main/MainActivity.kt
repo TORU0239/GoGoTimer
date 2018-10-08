@@ -3,7 +3,6 @@ package my.com.toru.gogotimer.ui.main
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
-import android.content.IntentFilter
 import android.databinding.DataBindingUtil
 import android.os.Bundle
 import android.support.v7.app.AppCompatActivity
@@ -21,27 +20,27 @@ class MainActivity : AppCompatActivity(){
         private val TAG = MainActivity::class.java.simpleName
     }
 
-    private lateinit var receiver: TimerReceiver
-
-    private var currentSeletedItem = -1
+    lateinit var mainBinding:ActivityMainBinding
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        val mainBinding: ActivityMainBinding = DataBindingUtil.setContentView(this, R.layout.activity_main)
-        mainBinding.mainViewModel = MainViewModel()
+        mainBinding = DataBindingUtil.setContentView(this, R.layout.activity_main)
+        mainBinding.apply {
+            mainViewModel = MainViewModel()
+        }
+
         initView()
-//        receiver = TimerReceiver()
     }
 
     override fun onResume() {
         super.onResume()
         Log.w("MainActivity", "onResume")
-        val intentFilter = IntentFilter()
-        intentFilter.apply {
-            addAction(CONST_UPDATE)
-            addAction(CONST_FINISHED)
-        }
-//        registerReceiver(receiver, intentFilter)
+        mainBinding.mainViewModel?.onResume()
+    }
+
+    override fun onPause() {
+        mainBinding.mainViewModel?.onPause()
+        super.onPause()
     }
 
     override fun onSaveInstanceState(outState: Bundle?) {
@@ -54,11 +53,6 @@ class MainActivity : AppCompatActivity(){
         Log.w(TAG, "onRestoreInstanceState")
     }
 
-    override fun onPause() {
-        unregisterReceiver(receiver)
-        super.onPause()
-    }
-
     override fun onBackPressed() {
         if(supportFragmentManager.fragments.size > 0){
             supportFragmentManager.popBackStack()
@@ -67,8 +61,6 @@ class MainActivity : AppCompatActivity(){
             super.onBackPressed()
         }
     }
-
-    private var isPlaying = false
 
     private fun initView(){
 //        btn_trigger_timer.setOnClickListener {
@@ -131,6 +123,17 @@ class MainActivity : AppCompatActivity(){
     }
 
     inner class TimerReceiver : BroadcastReceiver() {
+
+        fun saveData(){
+            val db = AppDatabase.getInstance(GoGoTimerApp.applicationContext())
+            val dao = db?.timerHistoryDao()
+            val historyData = TimerHistoryData()
+            historyData.apply {
+                taskName = ed_task.editableText.toString()
+                taskEndTimeStamp = System.currentTimeMillis()
+            }
+            dao?.insertData(historyData)
+        }
         override fun onReceive(context: Context?, intent: Intent?) {
             when(intent?.action){
                 CONST_UPDATE ->{
@@ -142,14 +145,7 @@ class MainActivity : AppCompatActivity(){
                 CONST_FINISHED -> {
                     Log.w(TAG, "finished")
                     btn_trigger_timer.setImageResource(R.drawable.ic_outline_arrow_forward_ios_24px)
-                    val db = AppDatabase.getInstance(GoGoTimerApp.applicationContext())
-                    val dao = db?.timerHistoryDao()
-                    val historyData = TimerHistoryData()
-                    historyData.apply {
-                        taskName = ed_task.editableText.toString()
-                        taskEndTimeStamp = System.currentTimeMillis()
-                    }
-                    dao?.insertData(historyData)
+                    saveData()
                 }
                 else-> Log.w(TAG, "WTF???")
             }

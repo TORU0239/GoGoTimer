@@ -16,4 +16,8 @@ interface TimerHistoryDao {
 
     @Query("DELETE from timerHistory")
     fun deleteAllData()
+
+//    @Query("SELECT MAX(id) from timerHistory order by id DESC")
+//    fun getTheLastestOne():TimerHistoryData
+
 }
