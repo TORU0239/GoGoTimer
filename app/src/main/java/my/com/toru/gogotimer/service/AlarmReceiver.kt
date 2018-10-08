@@ -5,9 +5,10 @@ import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import android.support.v4.app.NotificationCompat
-import android.util.Log
-import android.widget.Toast
 import my.com.toru.gogotimer.R
+import my.com.toru.gogotimer.app.GoGoTimerApp
+import my.com.toru.gogotimer.database.AppDatabase
+import my.com.toru.gogotimer.model.TimerHistoryData
 import my.com.toru.gogotimer.util.CONST_CHANNEL_NAME
 
 class AlarmReceiver:BroadcastReceiver() {
@@ -16,13 +17,25 @@ class AlarmReceiver:BroadcastReceiver() {
     }
     override fun onReceive(context: Context?, intent: Intent?) {
         context?.let{
-            Log.w(TAG, "onReceive End!!!!!!!!")
-            Toast.makeText(it, "Alarm Triggered!", Toast.LENGTH_SHORT).show()
             sendNotification(it)
+            saveData(intent?.getStringExtra("SEND_DATA_TASKNAME"))
         }
     }
 
-    fun sendNotification(context:Context){
+    private fun saveData(currentTaskName:String?){
+        val db = AppDatabase.getInstance(GoGoTimerApp.applicationContext())
+        val dao = db?.timerHistoryDao()
+        val historyData = TimerHistoryData()
+        historyData.apply {
+            currentTaskName?.let {
+                taskName = it
+                taskEndTimeStamp = System.currentTimeMillis()
+            }
+        }
+        dao?.insertData(historyData)
+    }
+
+    private fun sendNotification(context:Context){
         val notification = NotificationCompat.Builder(context, CONST_CHANNEL_NAME)
         val noti = notification.setContentTitle("TEST")
                 .setSmallIcon(R.mipmap.ic_launcher)
