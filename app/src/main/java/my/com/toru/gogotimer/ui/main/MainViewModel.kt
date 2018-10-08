@@ -40,6 +40,11 @@ class MainViewModel{
 
     val img = ObservableBoolean(false)
 
+    private var currentSelectedItem = -1
+    var remainedTime:Long = 0L
+
+    private lateinit var countDownTimer:TestCountDownTimer
+
     init {
         hours.set(0)
         minutes.set(0)
@@ -74,14 +79,13 @@ class MainViewModel{
         }
     }
 
-    private var currentSeletedItem = -1
 
     fun clickHours(v:View) {
         isHoursChecked.set(!isHoursChecked.get())
         if(isHoursChecked.get()){
             isMinutesChecked.set(false)
             isSecondsChecked.set(false)
-            currentSeletedItem = CurrentStatus.HOURS.status
+            currentSelectedItem = CurrentStatus.HOURS.status
         }
     }
 
@@ -90,7 +94,7 @@ class MainViewModel{
         if(isMinutesChecked.get()){
             isHoursChecked.set(false)
             isSecondsChecked.set(false)
-            currentSeletedItem = CurrentStatus.MINUTES.status
+            currentSelectedItem = CurrentStatus.MINUTES.status
         }
     }
 
@@ -99,12 +103,12 @@ class MainViewModel{
         if(isSecondsChecked.get()){
             isHoursChecked.set(false)
             isMinutesChecked.set(false)
-            currentSeletedItem = CurrentStatus.SECONDS.status
+            currentSelectedItem = CurrentStatus.SECONDS.status
         }
     }
 
     fun increaseTime(view:View){
-        when(currentSeletedItem){
+        when(currentSelectedItem){
             CurrentStatus.HOURS.status->{
                 if(hours.get() == 23){
                     Toast.makeText(view.context, "Cannot set timer more than one day", Toast.LENGTH_SHORT).show()
@@ -134,7 +138,7 @@ class MainViewModel{
     }
 
     fun decreaseTime(view:View){
-        when(currentSeletedItem){
+        when(currentSelectedItem){
             CurrentStatus.HOURS.status->{
                 if(hours.get()!! > 0){
                     hours.set(hours.get()?.minus(1))
@@ -179,8 +183,6 @@ class MainViewModel{
             Log.w("MainViewModel", "cannot pause!!")
         }
     }
-
-    lateinit var countDownTimer:TestCountDownTimer
 
     private fun triggerAlarmWithCountdown(ctx:Context, alarmTime:Long){
         countDownTimer = TestCountDownTimer(alarmTime, 1000)
@@ -235,9 +237,6 @@ class MainViewModel{
             Log.w(TAG, "total Size:: ${getAll().size}")
         }
     }
-
-
-    var remainedTime:Long = 0L
 
     inner class TestCountDownTimer(private val alarmTime: Long, private val interval:Long):CountDownTimer(alarmTime, interval){
         override fun onFinish() {
