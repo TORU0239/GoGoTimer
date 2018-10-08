@@ -7,6 +7,7 @@ import android.content.Intent
 import android.databinding.ObservableBoolean
 import android.databinding.ObservableField
 import android.os.Build
+import android.os.CountDownTimer
 import android.os.SystemClock
 import android.util.Log
 import android.view.View
@@ -178,6 +179,15 @@ class MainViewModel{
                     SystemClock.elapsedRealtime() + alarmTime,
                     pendingIntent)
         }
+
+        val start = object:CountDownTimer(alarmTime, 1000) {
+            override fun onFinish() {}
+
+            override fun onTick(millisUntilFinished: Long) {
+                Log.w("MainViewModel", "remained time:: " + (millisUntilFinished / 1000))
+            }
+        }
+        start.start()
     }
 
     private fun calculateTimeInMilliSecond(hour:Int, minute:Int, second:Int):Long =

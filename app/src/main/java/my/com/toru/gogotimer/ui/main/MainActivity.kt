@@ -30,7 +30,7 @@ class MainActivity : AppCompatActivity(){
         val mainBinding: ActivityMainBinding = DataBindingUtil.setContentView(this, R.layout.activity_main)
         mainBinding.mainViewModel = MainViewModel()
         initView()
-        receiver = TimerReceiver()
+//        receiver = TimerReceiver()
     }
 
     override fun onResume() {
@@ -41,7 +41,7 @@ class MainActivity : AppCompatActivity(){
             addAction(CONST_UPDATE)
             addAction(CONST_FINISHED)
         }
-        registerReceiver(receiver, intentFilter)
+//        registerReceiver(receiver, intentFilter)
     }
 
     override fun onSaveInstanceState(outState: Bundle?) {
