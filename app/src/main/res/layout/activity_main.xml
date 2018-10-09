@@ -144,7 +144,7 @@
             android:layout_height="48dp"
             android:layout_marginTop="40dp"
             android:src="@drawable/ic_outline_arrow_forward_ios_24px"
-            app:triggerIcon="@{mainViewModel.img}"
+            app:triggerIcon="@{mainViewModel.isAlarmTriggered}"
             android:onClick="@{mainViewModel::triggerTimer}"
             app:layout_constraintTop_toBottomOf="@id/rl_main_alarm"
             app:layout_constraintLeft_toLeftOf="parent"

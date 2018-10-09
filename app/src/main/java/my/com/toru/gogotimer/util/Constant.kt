@@ -1,5 +1,8 @@
 package my.com.toru.gogotimer.util
 
+const val DATABASE_NAME = "timerDatabase.db"
+
+
 const val CONST_UPDATE    = "com.my.toru.UPDATE"
 const val CONST_FINISHED  = "com.my.toru.FINISHED"
 

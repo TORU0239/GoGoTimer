@@ -21,10 +21,11 @@
             android:gravity="center">
 
             <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center"
-                android:text="NO SAVED DATA!!!"
+                android:id="@+id/txt_no_data"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:gravity="center"
+                android:text="@string/no_saved_data"
                 android:textSize="30sp"
                 android:textColor="@android:color/white"
                 android:textStyle="bold"/>
@@ -35,14 +36,14 @@
             android:layout_height="match_parent"
             app:layoutManager="android.support.v7.widget.LinearLayoutManager"/>
 
-        <android.support.design.widget.FloatingActionButton
-            android:id="@+id/fab_delete_all_history"
+        <ProgressBar
+            android:id="@+id/progress_history"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginRight="16dp"
-            android:layout_marginBottom="16dp"
-            android:src="@drawable/ic_baseline_alarm_on_24px"
-            android:onClick="@{historyViewModel::onDeleteAll}"
+            android:indeterminateTint="@color/colorAccent"
+            android:progressTint="@color/colorAccent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintLeft_toLeftOf="parent"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintRight_toRightOf="parent"/>
     </android.support.constraint.ConstraintLayout>

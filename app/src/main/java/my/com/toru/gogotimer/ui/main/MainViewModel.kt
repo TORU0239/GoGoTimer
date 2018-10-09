@@ -29,6 +29,10 @@ class MainViewModel{
     companion object {
         private val TAG = MainViewModel::class.java.simpleName
     }
+
+    //region Observable for UI Elements
+    var taskNames = ObservableField<String>("")
+
     val hours = ObservableField<Int>()
     val minutes = ObservableField<Int>()
     val seconds = ObservableField<Int>()
@@ -37,9 +41,9 @@ class MainViewModel{
     val isMinutesChecked = ObservableBoolean(false)
     val isSecondsChecked = ObservableBoolean(false)
 
-    var taskNames = ObservableField<String>("")
+    val isAlarmTriggered = ObservableBoolean(false)
 
-    val img = ObservableBoolean(false)
+    //endregion
 
     private var currentSelectedItem = -1
     var remainedTime:Long = 0L
@@ -58,7 +62,6 @@ class MainViewModel{
                     .replace(R.id.main_container, MyInfoFragment())
                     .addToBackStack("MYINFO")
                     .commitAllowingStateLoss()
-
     }
 
     fun goHistory(view:View){
@@ -79,7 +82,6 @@ class MainViewModel{
             false
         }
     }
-
 
     fun clickHours(v:View) {
         Util.hideSoftKeyboard(v)
@@ -167,7 +169,7 @@ class MainViewModel{
                                                         minutes.get()!!,
                                                         seconds.get()!!)
         Log.w("MainViewModel", "calculated time:: $alarmTime")
-        if(!img.get()){
+        if(!isAlarmTriggered.get()){
             taskNames.get()?.let {
                 if(it.isEmpty()){
                     Toast.makeText(view.context, "MUST set task name", Toast.LENGTH_SHORT).show()
@@ -190,14 +192,14 @@ class MainViewModel{
     private fun triggerAlarmWithCountdown(ctx:Context, alarmTime:Long){
         countDownTimer = TestCountDownTimer(alarmTime, 1000)
         countDownTimer.start()
-        img.set(true)
+        isAlarmTriggered.set(true)
         saveAlarmDataToDB(alarmTime)
     }
 
     private fun resumeCountdown(alarmTime:Long, nameOfTask:String){
         countDownTimer = TestCountDownTimer(alarmTime, 1000)
         countDownTimer.start()
-        img.set(true)
+        isAlarmTriggered.set(true)
         taskNames.set(nameOfTask)
     }
 
@@ -252,41 +254,8 @@ class MainViewModel{
         }
     }
 
-    inner class TestCountDownTimer(private val alarmTime: Long, private val interval:Long):CountDownTimer(alarmTime, interval){
-        override fun onFinish() {
-            img.set(false)
-            // TODO: Effect!!
-            val db = AppDatabase.getInstance(GoGoTimerApp.applicationContext())
-            val dao = db?.timerHistoryDao()
-            val historyData = TimerHistoryData()
-            historyData.apply {
-                taskNames.get()?.let {
-                    taskName = it
-                }
-                taskEndTimeStamp = System.currentTimeMillis()
-            }
-            dao?.insertData(historyData)
-        }
-
-        override fun onTick(millisUntilFinished: Long) {
-            Log.w("MainViewModel", "remained time:: " + (millisUntilFinished / 1000))
-            remainedTime = millisUntilFinished
-
-            val leftHours = (millisUntilFinished / 1000) / 3600
-            val leftMinutes = (millisUntilFinished / 1000) / 60
-            val leftSeconds = (millisUntilFinished / 1000) % 60
-
-            Log.w("MainViewModel", "hours: $leftHours, minutes: $leftMinutes, seconds: $leftSeconds")
-
-            hours.set(leftHours.toInt())
-            minutes.set(leftMinutes.toInt())
-            seconds.set(leftSeconds.toInt())
-        }
-    }
-
     fun onResume(){
         Log.w("MainView", "onResume")
-        // TODO: Reading Database in Thread
         val db = AppDatabase.getInstance(GoGoTimerApp.applicationContext())
         val dao = db?.timerHistoryDao()
         Log.w(TAG, "total count: ${dao?.getTotalCountOfData()}")
@@ -311,6 +280,41 @@ class MainViewModel{
         Log.w("MainView", "onPause, remained time:: $remainedTime")
         if(remainedTime != 0L){
             triggerAlarmManager(GoGoTimerApp.applicationContext(), remainedTime)
+        }
+    }
+
+    inner class TestCountDownTimer(private val alarmTime: Long, private val interval:Long):CountDownTimer(alarmTime, interval){
+        private fun saveData(){
+            val db = AppDatabase.getInstance(GoGoTimerApp.applicationContext())
+            val dao = db?.timerHistoryDao()
+            val historyData = TimerHistoryData()
+            historyData.apply {
+                taskNames.get()?.let {
+                    taskName = it
+                }
+                taskEndTimeStamp = System.currentTimeMillis()
+            }
+            dao?.insertData(historyData)
+        }
+
+        override fun onFinish() {
+            isAlarmTriggered.set(false)
+            saveData()
+        }
+
+        override fun onTick(millisUntilFinished: Long) {
+            Log.w("MainViewModel", "remained time:: " + (millisUntilFinished / 1000))
+            remainedTime = millisUntilFinished
+
+            val leftHours = (millisUntilFinished / 1000) / 3600
+            val leftMinutes = (millisUntilFinished / 1000) / 60
+            val leftSeconds = (millisUntilFinished / 1000) % 60
+
+            Log.w("MainViewModel", "hours: $leftHours, minutes: $leftMinutes, seconds: $leftSeconds")
+
+            hours.set(leftHours.toInt())
+            minutes.set(leftMinutes.toInt())
+            seconds.set(leftSeconds.toInt())
         }
     }
 }

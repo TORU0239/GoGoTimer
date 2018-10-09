@@ -1,5 +1,7 @@
 package my.com.toru.gogotimer.ui.main
 
+import android.app.Notification
+import android.app.PendingIntent
 import android.databinding.BindingAdapter
 import android.support.v4.app.NotificationCompat
 import android.widget.ImageView
@@ -24,9 +26,12 @@ fun ImageView.setTriggerIcon(isTimerTriggered:Boolean){
 
 fun NotificationCompat.Builder.generate(contentTxt:String,
                                         contentTitle:String,
-                                        priority:Int): NotificationCompat.Builder
+                                        priority:Int,
+                                        pendingIntent:PendingIntent): Notification
         = this.setSmallIcon(R.mipmap.ic_launcher)
         .setContentText(contentTxt)
         .setContentTitle(contentTitle)
         .setAutoCancel(true)
         .setPriority(priority)
+        .setFullScreenIntent(pendingIntent, true)
+        .build()

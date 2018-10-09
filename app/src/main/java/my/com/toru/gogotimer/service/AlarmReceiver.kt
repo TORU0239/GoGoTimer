@@ -12,8 +12,10 @@ import my.com.toru.gogotimer.app.GoGoTimerApp
 import my.com.toru.gogotimer.database.AppDatabase
 import my.com.toru.gogotimer.model.TimerHistoryData
 import my.com.toru.gogotimer.ui.main.MainActivity
+import my.com.toru.gogotimer.ui.main.generate
 import my.com.toru.gogotimer.util.CONST_CHANNEL_NAME
 import my.com.toru.gogotimer.util.CONST_FINISHED
+import my.com.toru.gogotimer.util.SEND_DATA_TASK_NAME
 
 class AlarmReceiver:BroadcastReceiver() {
     companion object {
@@ -23,7 +25,7 @@ class AlarmReceiver:BroadcastReceiver() {
         when(intent?.action){
             CONST_FINISHED->{
                 context?.let{ ctx->
-                    with(receiver = intent.getStringExtra("SEND_DATA_TASK_NAME")){
+                    with(receiver = intent.getStringExtra(SEND_DATA_TASK_NAME)){
                         sendNotification(ctx, this)
                         saveData(this)
                     }
@@ -49,18 +51,16 @@ class AlarmReceiver:BroadcastReceiver() {
     }
 
     private fun sendNotification(context:Context, taskName:String){
-        val notification = NotificationCompat.Builder(context, CONST_CHANNEL_NAME)
         val intent = Intent(context, MainActivity::class.java)
                 .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
                 .addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK)
-
         val pendingIntent = PendingIntent.getActivity(context, System.currentTimeMillis().toInt(), intent, PendingIntent.FLAG_UPDATE_CURRENT)
-        val noti = notification.setContentTitle("GOGOALARM")
-                .setSmallIcon(R.mipmap.ic_launcher)
-                .setContentText("$taskName LAUNCHED!!!")
-                .setAutoCancel(true)
-                .setFullScreenIntent(pendingIntent, true)
-                .build()
+        val notification = NotificationCompat.Builder(context, CONST_CHANNEL_NAME)
+        val noti = notification.generate("$taskName LAUNCHED!!!",
+                "GOGOALARM",
+                NotificationCompat.PRIORITY_MAX,
+                pendingIntent)
+
         val notiManager = context.applicationContext.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
         notiManager.notify(1024, noti)
     }

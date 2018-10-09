@@ -6,6 +6,7 @@ import android.arch.persistence.room.RoomDatabase
 import android.content.Context
 import my.com.toru.gogotimer.database.dao.TimerHistoryDao
 import my.com.toru.gogotimer.model.TimerHistoryData
+import my.com.toru.gogotimer.util.DATABASE_NAME
 
 @Database(entities = [TimerHistoryData::class], version = 1)
 abstract class AppDatabase : RoomDatabase() {
@@ -18,7 +19,9 @@ abstract class AppDatabase : RoomDatabase() {
             if(INSTANCE == null){
                 INSTANCE = Room.databaseBuilder(context.applicationContext,
                                                 AppDatabase::class.java,
-                                                "timerDatabase.db").allowMainThreadQueries().build()
+                                                DATABASE_NAME)
+                                                .allowMainThreadQueries()
+                                                .build()
             }
 
             return INSTANCE
