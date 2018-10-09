@@ -8,3 +8,6 @@ const val CONST_MINUTES = "MINUTES"
 const val CONST_SECONDS = "SECONDS"
 
 const val CONST_CHANNEL_NAME = "GOGOTIMER_CHANNEL"
+
+/* Constant for Intent */
+const val SEND_DATA_TASK_NAME = "SEND_DATA_TASK_NAME"

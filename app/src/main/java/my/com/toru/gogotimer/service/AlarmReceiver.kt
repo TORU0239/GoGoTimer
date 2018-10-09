@@ -6,21 +6,32 @@ import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import android.support.v4.app.NotificationCompat
+import android.util.Log
 import my.com.toru.gogotimer.R
 import my.com.toru.gogotimer.app.GoGoTimerApp
 import my.com.toru.gogotimer.database.AppDatabase
 import my.com.toru.gogotimer.model.TimerHistoryData
 import my.com.toru.gogotimer.ui.main.MainActivity
 import my.com.toru.gogotimer.util.CONST_CHANNEL_NAME
+import my.com.toru.gogotimer.util.CONST_FINISHED
 
 class AlarmReceiver:BroadcastReceiver() {
     companion object {
         private val TAG = AlarmReceiver::class.java.simpleName
     }
     override fun onReceive(context: Context?, intent: Intent?) {
-        context?.let{
-            sendNotification(it)
-            saveData(intent?.getStringExtra("SEND_DATA_TASKNAME"))
+        when(intent?.action){
+            CONST_FINISHED->{
+                context?.let{ ctx->
+                    with(receiver = intent.getStringExtra("SEND_DATA_TASK_NAME")){
+                        sendNotification(ctx, this)
+                        saveData(this)
+                    }
+                }
+            }
+            else->{
+                Log.w(TAG, "Do Nothing!!")
+            }
         }
     }
 
@@ -37,13 +48,16 @@ class AlarmReceiver:BroadcastReceiver() {
         dao?.insertData(historyData)
     }
 
-    private fun sendNotification(context:Context){
+    private fun sendNotification(context:Context, taskName:String){
         val notification = NotificationCompat.Builder(context, CONST_CHANNEL_NAME)
-        val intent = Intent(context , MainActivity::class.java).addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP)
-        val pendingIntent = PendingIntent.getActivity(context, 1, intent, PendingIntent.FLAG_UPDATE_CURRENT)
-        val noti = notification.setContentTitle("TEST")
+        val intent = Intent(context, MainActivity::class.java)
+                .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                .addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK)
+
+        val pendingIntent = PendingIntent.getActivity(context, System.currentTimeMillis().toInt(), intent, PendingIntent.FLAG_UPDATE_CURRENT)
+        val noti = notification.setContentTitle("GOGOALARM")
                 .setSmallIcon(R.mipmap.ic_launcher)
-                .setContentText("TRIGGERED!!!")
+                .setContentText("$taskName LAUNCHED!!!")
                 .setAutoCancel(true)
                 .setFullScreenIntent(pendingIntent, true)
                 .build()

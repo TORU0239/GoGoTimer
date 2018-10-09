@@ -20,7 +20,9 @@ import my.com.toru.gogotimer.model.TimerHistoryData
 import my.com.toru.gogotimer.service.AlarmReceiver
 import my.com.toru.gogotimer.ui.history.HistoryFragment
 import my.com.toru.gogotimer.ui.info.MyInfoFragment
+import my.com.toru.gogotimer.util.CONST_FINISHED
 import my.com.toru.gogotimer.util.CurrentStatus
+import my.com.toru.gogotimer.util.SEND_DATA_TASK_NAME
 import my.com.toru.gogotimer.util.Util
 
 class MainViewModel{
@@ -164,7 +166,6 @@ class MainViewModel{
         val alarmTime = calculateTimeInMilliSecond(hours.get()!!,
                                                         minutes.get()!!,
                                                         seconds.get()!!)
-
         Log.w("MainViewModel", "calculated time:: $alarmTime")
         if(!img.get()){
             taskNames.get()?.let {
@@ -203,27 +204,32 @@ class MainViewModel{
     private fun cancelAlarmManager(ctx:Context){
         val alarmManager:AlarmManager? = ctx.getSystemService(Context.ALARM_SERVICE) as AlarmManager
         val pendingIntent:PendingIntent = Intent(ctx, AlarmReceiver::class.java).let {
-            PendingIntent.getBroadcast(ctx, 0 , it,0)
+            PendingIntent.getBroadcast(ctx, System.currentTimeMillis().toInt() , it,0)
         }
         alarmManager?.cancel(pendingIntent)
     }
 
     private fun triggerAlarmManager(ctx:Context, alarmTime: Long){
-        val alarmManager:AlarmManager? = ctx.applicationContext.getSystemService(Context.ALARM_SERVICE) as AlarmManager
         val pendingIntent:PendingIntent = Intent(ctx, AlarmReceiver::class.java).let {
-            it.putExtra("SEND_DATA_TASKNAME", taskNames.get())
-            PendingIntent.getBroadcast(ctx, 0 , it,0)
+            it.action = CONST_FINISHED
+            it.putExtra(SEND_DATA_TASK_NAME, taskNames.get())
+            PendingIntent.getBroadcast(ctx, System.currentTimeMillis().toInt() , it,0)
         }
-        if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.M){
-            alarmManager?.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP,
-                    System.currentTimeMillis() + alarmTime - 1000,
-                    pendingIntent)
+
+        val alarmManager:AlarmManager? = ctx.getSystemService(Context.ALARM_SERVICE) as AlarmManager
+        alarmManager?.apply {
+            if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.M){
+                setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP,
+                        System.currentTimeMillis() + alarmTime - 1000,
+                        pendingIntent)
+            }
+            else{
+                setExact(AlarmManager.RTC_WAKEUP,
+                        System.currentTimeMillis() + alarmTime - 1000,
+                        pendingIntent)
+            }
         }
-        else{
-            alarmManager?.setExact(AlarmManager.RTC_WAKEUP,
-                    System.currentTimeMillis() + alarmTime - 1000,
-                    pendingIntent)
-        }
+        countDownTimer.cancel()
     }
 
     private fun calculateTimeInMilliSecond(hour:Int, minute:Int, second:Int):Long =
@@ -283,12 +289,11 @@ class MainViewModel{
         // TODO: Reading Database in Thread
         val db = AppDatabase.getInstance(GoGoTimerApp.applicationContext())
         val dao = db?.timerHistoryDao()
+        Log.w(TAG, "total count: ${dao?.getTotalCountOfData()}")
 
-        if(dao?.getAll()?.size != 0){
-            dao?.getAll()?.get(0)?.let {
-                Log.w(TAG, "current Time :: " + System.currentTimeMillis())
-                Log.w(TAG, "name:: ${it.taskName}, start: ${it.taskStartTimeStamp}, duration: ${it.timerInMillisecond}")
-
+        if(dao?.getTotalCountOfData() != 0){
+            dao?.getTheLatestOne()?.let {
+                Log.w(TAG, "current ID :: ${it.id}, name:: ${it.taskName}")
                 if(System.currentTimeMillis() < (it.taskStartTimeStamp + it.timerInMillisecond)){
                     remainedTime = ((it.taskStartTimeStamp + it.timerInMillisecond) - System.currentTimeMillis())
                     Log.w(TAG, "remained Time:: $remainedTime")
