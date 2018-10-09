@@ -48,7 +48,7 @@ class MainViewModel{
     private var currentSelectedItem = -1
     var remainedTime:Long = 0L
 
-    private lateinit var countDownTimer:TestCountDownTimer
+    private lateinit var countDownTimer:GoGoCountdownTimer
 
     init {
         hours.set(0)
@@ -190,14 +190,14 @@ class MainViewModel{
     }
 
     private fun triggerAlarmWithCountdown(ctx:Context, alarmTime:Long){
-        countDownTimer = TestCountDownTimer(alarmTime, 1000)
+        countDownTimer = GoGoCountdownTimer(alarmTime, 1000)
         countDownTimer.start()
         isAlarmTriggered.set(true)
         saveAlarmDataToDB(alarmTime)
     }
 
     private fun resumeCountdown(alarmTime:Long, nameOfTask:String){
-        countDownTimer = TestCountDownTimer(alarmTime, 1000)
+        countDownTimer = GoGoCountdownTimer(alarmTime, 1000)
         countDownTimer.start()
         isAlarmTriggered.set(true)
         taskNames.set(nameOfTask)
@@ -283,7 +283,7 @@ class MainViewModel{
         }
     }
 
-    inner class TestCountDownTimer(private val alarmTime: Long, private val interval:Long):CountDownTimer(alarmTime, interval){
+    inner class GoGoCountdownTimer(private val alarmTime: Long, private val interval:Long):CountDownTimer(alarmTime, interval){
         private fun saveData(){
             val db = AppDatabase.getInstance(GoGoTimerApp.applicationContext())
             val dao = db?.timerHistoryDao()
