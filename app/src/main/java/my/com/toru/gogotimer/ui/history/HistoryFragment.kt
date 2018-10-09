@@ -8,30 +8,20 @@ import android.support.v7.widget.DividerItemDecoration
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.view.animation.AnimationUtils
 import kotlinx.android.synthetic.main.activity_history.*
 import my.com.toru.gogotimer.R
 import my.com.toru.gogotimer.app.GoGoTimerApp
-import my.com.toru.gogotimer.database.AppDatabase
 import my.com.toru.gogotimer.databinding.ActivityHistoryBinding
 import my.com.toru.gogotimer.model.TimerHistoryData
-import java.util.ArrayList
+import java.util.*
 
-// TODO: Rename parameter arguments, choose names that match
-// the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
-private const val ARG_PARAM1 = "param1"
-private const val ARG_PARAM2 = "param2"
-
-/**
- * A simple [Fragment] subclass.
- * Use the [HistoryFragment.newInstance] factory method to
- * create an instance of this fragment.
- *
- */
 class HistoryFragment : Fragment() {
+    lateinit var historyDataBinding:ActivityHistoryBinding
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
                               savedInstanceState: Bundle?): View?{
-        val historyDataBinding:ActivityHistoryBinding = DataBindingUtil.inflate(inflater, R.layout.activity_history, container, false)
+        historyDataBinding = DataBindingUtil.inflate(inflater, R.layout.activity_history, container, false)
         historyDataBinding.historyViewModel = HistoryViewModel()
         return historyDataBinding.root
     }
@@ -42,15 +32,29 @@ class HistoryFragment : Fragment() {
     }
 
     private fun initRecyclerView(){
-        val db = AppDatabase.getInstance(GoGoTimerApp.applicationContext())
-        val totalDB = db?.timerHistoryDao()?.getAll()
-        if(totalDB?.size == 0){
-            ll_no_data_container.visibility = View.VISIBLE
-            fab_delete_all_history.visibility = View.GONE
-        }
-        else{
-            rcvTimerHistory.adapter = HistoryAdapter(totalDB as ArrayList<TimerHistoryData>)
-            rcvTimerHistory.addItemDecoration(DividerItemDecoration(GoGoTimerApp.applicationContext(), DividerItemDecoration.VERTICAL))
+        historyDataBinding.historyViewModel?.loadDataFromDao{
+            activity?.runOnUiThread {
+                progress_history.visibility = View.GONE
+                if(it.isEmpty()){
+                    with(txt_no_data){
+                        ll_no_data_container.visibility = View.VISIBLE
+                        animation = AnimationUtils.loadAnimation(context, R.anim.no_data_anim)
+                        animation.start()
+                    }
+                }
+                else{
+                    val itemDecoration = DividerItemDecoration(GoGoTimerApp.applicationContext(), DividerItemDecoration.VERTICAL)
+                    itemDecoration.setDrawable(GoGoTimerApp.applicationContext().getDrawable(R.drawable.shape_divider))
+                    val controller = AnimationUtils.loadLayoutAnimation(context, R.anim.layout_recyclerview_anim)
+
+                    with(rcvTimerHistory){
+                        layoutAnimation = controller
+                        adapter = HistoryAdapter(it as ArrayList<TimerHistoryData>)
+                        addItemDecoration(itemDecoration)
+                        scheduleLayoutAnimation()
+                    }
+                }
+            }
         }
     }
 
