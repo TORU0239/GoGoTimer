@@ -216,13 +216,13 @@ class MainViewModel{
             PendingIntent.getBroadcast(ctx, 0 , it,0)
         }
         if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.M){
-            alarmManager?.setExactAndAllowWhileIdle(AlarmManager.ELAPSED_REALTIME_WAKEUP,
-                    SystemClock.elapsedRealtime() + alarmTime,
+            alarmManager?.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP,
+                    System.currentTimeMillis() + alarmTime - 1000,
                     pendingIntent)
         }
         else{
-            alarmManager?.setExact(AlarmManager.ELAPSED_REALTIME_WAKEUP,
-                    SystemClock.elapsedRealtime() + alarmTime,
+            alarmManager?.setExact(AlarmManager.RTC_WAKEUP,
+                    System.currentTimeMillis() + alarmTime - 1000,
                     pendingIntent)
         }
     }
@@ -284,18 +284,21 @@ class MainViewModel{
         // TODO: Reading Database in Thread
         val db = AppDatabase.getInstance(GoGoTimerApp.applicationContext())
         val dao = db?.timerHistoryDao()
-        dao?.getAll()?.get(0)?.let {
-            Log.w(TAG, "current Time :: " + System.currentTimeMillis())
-            Log.w(TAG, "name:: ${it.taskName}, start: ${it.taskStartTimeStamp}, duration: ${it.timerInMillisecond}")
 
-            if(System.currentTimeMillis() < (it.taskStartTimeStamp + it.timerInMillisecond)){
-                remainedTime = ((it.taskStartTimeStamp + it.timerInMillisecond) - System.currentTimeMillis())
-                Log.w(TAG, "remained Time:: $remainedTime")
-                resumeCountdown(remainedTime, it.taskName)
-                cancelAlarmManager(GoGoTimerApp.applicationContext())
-            }
-            else{
-                // DO NOTHING, already passed.
+        if(dao?.getAll()?.size != 0){
+            dao?.getAll()?.get(0)?.let {
+                Log.w(TAG, "current Time :: " + System.currentTimeMillis())
+                Log.w(TAG, "name:: ${it.taskName}, start: ${it.taskStartTimeStamp}, duration: ${it.timerInMillisecond}")
+
+                if(System.currentTimeMillis() < (it.taskStartTimeStamp + it.timerInMillisecond)){
+                    remainedTime = ((it.taskStartTimeStamp + it.timerInMillisecond) - System.currentTimeMillis())
+                    Log.w(TAG, "remained Time:: $remainedTime")
+                    resumeCountdown(remainedTime, it.taskName)
+                    cancelAlarmManager(GoGoTimerApp.applicationContext())
+                }
+                else{
+                    // DO NOTHING, already passed.
+                }
             }
         }
     }
