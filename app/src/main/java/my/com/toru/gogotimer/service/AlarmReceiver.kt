@@ -47,7 +47,7 @@ class AlarmReceiver:BroadcastReceiver() {
                 .setAutoCancel(true)
                 .setFullScreenIntent(pendingIntent, true)
                 .build()
-        val notiManager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+        val notiManager = context.applicationContext.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
         notiManager.notify(1024, noti)
     }
 }

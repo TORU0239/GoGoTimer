@@ -8,7 +8,6 @@ import android.databinding.ObservableBoolean
 import android.databinding.ObservableField
 import android.os.Build
 import android.os.CountDownTimer
-import android.os.SystemClock
 import android.util.Log
 import android.view.View
 import android.view.inputmethod.EditorInfo
@@ -210,7 +209,7 @@ class MainViewModel{
     }
 
     private fun triggerAlarmManager(ctx:Context, alarmTime: Long){
-        val alarmManager:AlarmManager? = ctx.getSystemService(Context.ALARM_SERVICE) as AlarmManager
+        val alarmManager:AlarmManager? = ctx.applicationContext.getSystemService(Context.ALARM_SERVICE) as AlarmManager
         val pendingIntent:PendingIntent = Intent(ctx, AlarmReceiver::class.java).let {
             it.putExtra("SEND_DATA_TASKNAME", taskNames.get())
             PendingIntent.getBroadcast(ctx, 0 , it,0)
@@ -304,7 +303,9 @@ class MainViewModel{
     }
 
     fun onPause(){
-        Log.w("MainView", "onPause")
-        triggerAlarmManager(GoGoTimerApp.applicationContext(), remainedTime)
+        Log.w("MainView", "onPause, remained time:: $remainedTime")
+        if(remainedTime != 0L){
+            triggerAlarmManager(GoGoTimerApp.applicationContext(), remainedTime)
+        }
     }
 }
